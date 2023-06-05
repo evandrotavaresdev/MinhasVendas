@@ -1,0 +1,51 @@
+﻿@model MinhasVendas.App.Models.TransacaoDeEstoque
+@using MinhasVendas.App.Models.Enums
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>TransacaoDeEstoque</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ProdutoId" class="control-label"></label>
+                <select asp-for="ProdutoId" class ="form-control" asp-items="ViewBag.ProdutoId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="OrdemDeCompraId" class="control-label"></label>
+                <select asp-for="OrdemDeCompraId" class ="form-control" asp-items="ViewBag.OrdemDeCompraId"><option></option></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="OrdemDeVendaId" class="control-label"></label>
+                <select asp-for="OrdemDeVendaId" class ="form-control" asp-items="ViewBag.OrdemDeVendaId"><option></option></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Quantidade" class="control-label"></label>
+                <input asp-for="Quantidade" class="form-control" />
+                <span asp-validation-for="Quantidade" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TipoDransacaoDeEstoque" class="control-label"></label>
+                <select asp-for="TipoDransacaoDeEstoque" class="form-control" asp-items="Html.GetEnumSelectList<TipoDransacaoDeEstoque>()"><option></option></select>
+                <span asp-validation-for="TipoDransacaoDeEstoque" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
