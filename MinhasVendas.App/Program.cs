@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MinhasVendas.App.Data;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MinhasVendasAppContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AppEstoquesEVendasContext") ?? throw new InvalidOperationException("Connection string 'AppEstoquesEVendasContext' not found.")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MinhasVendasAppContext") ?? throw new InvalidOperationException("Connection string 'MinhasVendasAppContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
