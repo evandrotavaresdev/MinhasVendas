@@ -15,6 +15,7 @@ namespace MinhasVendas.App.Models
 
         public int Quantidade { get; set; }
         public TipoDransacaoDeEstoque TipoDransacaoDeEstoque { get; set; }
+        public DateTime DataDeTransacao { get; set; }
 
         /*Ef Relacionamento */
         public Produto? Produto { get; set; }

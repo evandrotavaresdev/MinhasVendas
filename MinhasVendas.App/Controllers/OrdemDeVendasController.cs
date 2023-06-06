@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Models;
+using MinhasVendas.App.ViewModels;
 
 namespace MinhasVendas.App.Controllers
 {
@@ -18,6 +19,49 @@ namespace MinhasVendas.App.Controllers
         {
             _context = context;
         }
+
+        public async Task<IActionResult> CarrinhoDeVendas(int? id)
+        {
+            if (id == null || _context.OrdemDeVendas == null)
+            {
+                return NotFound();
+            }
+
+            var ordemDeVenda = await _context.OrdemDeVendas
+                 .Include(v => v.Cliente)
+                 .Include(v => v.DetalheDeVendas).ThenInclude(v => v.Produto)
+                 .FirstOrDefaultAsync(m => m.Id == id);
+
+
+            if (ordemDeVenda == null)
+            {
+                return NotFound();
+            }
+
+
+            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "NomeProduto");
+
+            var model = new CarrinhoDeVendasViewModel();
+            model.OrdemDeVenda = ordemDeVenda;
+
+            if (ordemDeVenda.DetalheDeVendas.Any())
+            {
+                var precoProduto = from item in model.OrdemDeVenda.DetalheDeVendas select (item.PrecoUnitario * item.Quantidade * (1 - item.Desconto / 100));
+                decimal[] precoProdutos = precoProduto.ToArray();
+                decimal totalVenda = precoProdutos.Aggregate((a, b) => a + b);
+                model.TotalVenda = totalVenda;
+
+                var itens = from item in model.OrdemDeVenda.DetalheDeVendas select (item.Quantidade);
+                int totalItens = itens.Sum();
+                model.TotalItens = totalItens;
+            }
+
+          
+            return View(model);
+        }
+
+
+        /* */
 
         // GET: OrdemDeVendas
         public async Task<IActionResult> Index()

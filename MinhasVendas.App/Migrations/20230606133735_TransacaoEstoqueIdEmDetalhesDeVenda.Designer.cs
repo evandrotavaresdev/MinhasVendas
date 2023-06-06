@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MinhasVendas.App.Data;
 
@@ -11,9 +12,10 @@ using MinhasVendas.App.Data;
 namespace MinhasVendas.App.Migrations
 {
     [DbContext(typeof(MinhasVendasAppContext))]
-    partial class MinhasVendasAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230606133735_TransacaoEstoqueIdEmDetalhesDeVenda")]
+    partial class TransacaoEstoqueIdEmDetalhesDeVenda
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

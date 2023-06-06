@@ -2,8 +2,8 @@
 {
     public enum FormaDePagamento
     {        
-        Dinheiro = 0,
-        Pix = 1,
+        Pix = 0,
+        Dinheiro = 1,
         Cartao = 2
     }
 }

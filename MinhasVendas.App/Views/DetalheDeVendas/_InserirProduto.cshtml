@@ -1,0 +1,45 @@
+﻿@model MinhasVendas.App.ViewModels.CarrinhoDeVendasViewModel
+
+@{
+    ViewData["Title"] = "Inserir Produto";
+}
+
+    <div class="modal-header">
+        <h5 class="modal-title">@ViewData["Title"]</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>     
+    </div>
+
+<form asp-action="InserirProduto" id="inserirProdutoForm">
+    
+    <div class="modal-body">    
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>        
+        <div class="form-group">
+            <label asp-for="@Model.DetalheDeVenda.OrdemDeVendaId class="control-label"></label>
+            <input readonly asp-for="@Model.DetalheDeVenda.OrdemDeVendaId" class="form-control" value=@ViewBag.OrdemDeVendaId>
+        </div>     
+        <div class="form-group">
+            <label asp-for="@Model.DetalheDeVenda.ProdutoId" class="control-label"></label>
+            <select asp-for="@Model.DetalheDeVenda.ProdutoId" class="form-control" asp-items="ViewBag.ProdutoId"></select>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.DetalheDeVenda.Quantidade" class="control-label"></label>
+            <input asp-for="@Model.DetalheDeVenda.Quantidade" class="form-control" />
+            <span asp-validation-for="@Model.DetalheDeVenda.Quantidade" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.DetalheDeVenda.Desconto" class="control-label"></label>
+            <input asp-for="@Model.DetalheDeVenda.Desconto" class="form-control" />
+            <span asp-validation-for="@Model.DetalheDeVenda.Desconto" class="text-danger"></span>
+        </div>
+      
+        <div class="modal-footer">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Inserir Produto" class="btn btn-success" />
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    
+    </div>
+</form>
+
+

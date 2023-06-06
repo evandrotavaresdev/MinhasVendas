@@ -1,0 +1,198 @@
+﻿@model MinhasVendas.App.ViewModels.CarrinhoDeVendasViewModel
+
+@{
+    ViewData["Title"] = "Carrinho de Vendas";
+}
+
+<h1>Carrinho de Venda</h1>
+
+<div>
+    <h4>Vendas</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeVenda.DataDeVenda)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeVenda.DataDeVenda)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeVenda.FormaDePagamento)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeVenda.FormaDePagamento)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeVenda.DataDePagamento)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeVenda.DataDePagamento)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeVenda.StatusOrdemDeVenda)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeVenda.StatusOrdemDeVenda)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeVenda.Cliente)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeVenda.Cliente.Id)
+        </dd>
+    </dl>
+</div>
+<br/>
+
+<strong>Total da Venda: @Model.TotalVenda</strong>
+<strong>Total de Itens: @Model.TotalItens</strong>
+
+<div>
+    <div style="float:left">
+        <button class="btn btn-primary" onclick="InserirProduto(@Model.OrdemDeVenda.Id)">Inserir Produto</button>
+    </div>  
+</div>
+
+<div>
+    <div style="float:left">
+        <button class="btn btn-primary" onclick="FinalizarVenda(@Model.OrdemDeVenda.Id)">Finalizar Venda</button>
+    </div>
+</div>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.Name("Produto")
+            </th>
+            <th>
+                @Html.Name("Quantidade")
+            </th>
+            <th>
+                @Html.Name("PrecoUnitario")
+            </th>
+            <th>
+                @Html.Name("Desconto")
+            </th>
+            <th>
+                @Html.Name("TotalProduto")
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrdemDeVenda.DetalheDeVendas)
+        {
+            var produtoTotal = item.Quantidade * item.PrecoUnitario * (1 - (item.Desconto/100));
+
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Produto.Nome)
+                </td> 
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantidade)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PrecoUnitario)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Desconto)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => produtoTotal)
+                </td>                                
+                <td>
+                    <div style="float:left">
+                        <button class="btn btn-primary" onclick="ExcluirProduto(@item.Id)">Excluir Produto</button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.OrdemDeVenda.Id">Editar</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<div class="modal fade" id="inserirProdutoFormModel">
+    <div class="modal-dialog" >
+        <div class="modal-content">
+            <div id="inserirProdutoFormModelDiv"> </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ExcluirProdutoFormModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="ExcluirProdutoFormModelDiv"> </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="finalizarVendaFormModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="finalizarVendaFormModelDiv"> </div>
+        </div>
+    </div>
+</div>
+                     
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+
+<script>
+                    
+        var InserirProduto = function (vendaId) {
+
+            var vendaId = vendaId;
+            var action = "/DetalheDeVendas/InserirProduto/";
+            var url = action + vendaId;
+
+            $("#inserirProdutoFormModelDiv").load(url, function () {
+                $("#inserirProdutoFormModel").modal("show");
+
+            var form = document.getElementById("inserirProdutoForm");
+            $.validator.unobtrusive.parse(inserirProdutoForm);
+        });
+
+        }
+
+        var ExcluirProduto = function (id) {
+
+            var id = id;
+            var action = "/DetalheDeVendas/ExcluirProduto/";
+            var url = action+id;
+
+            $("#ExcluirProdutoFormModelDiv").load(url, function () {
+                $("#ExcluirProdutoFormModel").modal("show");                
+            });
+        }
+
+        var FinalizarVenda = function (vendaId) {
+
+            var vendaId = vendaId;
+            var action = "/DetalheDeVendas/FinalizarVenda/";
+            var url = action + vendaId;
+
+            $("#finalizarVendaFormModelDiv").load(url, function () {
+                $("#finalizarVendaFormModel").modal("show");
+
+                var form = document.getElementById("finalizarVendaForm");
+                $.validator.unobtrusive.parse(finalizarVendaForm);
+            });
+
+        }
+</script>
+
+
+
+
+
+
+            
+            

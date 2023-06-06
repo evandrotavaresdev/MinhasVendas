@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MinhasVendas.App.Data;
 
@@ -11,9 +12,10 @@ using MinhasVendas.App.Data;
 namespace MinhasVendas.App.Migrations
 {
     [DbContext(typeof(MinhasVendasAppContext))]
-    partial class MinhasVendasAppContextModelSnapshot : ModelSnapshot
+    [Migration("20230606122403_EstoqueAtualEmProdutos")]
+    partial class EstoqueAtualEmProdutos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,9 +93,6 @@ namespace MinhasVendas.App.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Quantidade")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TransacaoDeEstoqueId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -201,9 +200,6 @@ namespace MinhasVendas.App.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("DataDeTransacao")
-                        .HasColumnType("datetime2");
 
                     b.Property<int?>("OrdemDeCompraId")
                         .HasColumnType("int");

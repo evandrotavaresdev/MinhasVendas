@@ -1,0 +1,56 @@
+﻿@model MinhasVendas.App.ViewModels.CarrinhoDeVendasViewModel
+
+@{
+    ViewData["Title"] = "Excluir Produto";
+}
+
+    <div class="modal-header">
+        <h5 class="modal-title">@ViewData["Title"]</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>     
+    </div>
+               
+    <div class="modal-body">                                     
+            <dl class="row">
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.DetalheDeVenda.Quantidade)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.DetalheDeVenda.Quantidade)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.DetalheDeVenda.PrecoUnitario)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.DetalheDeVenda.PrecoUnitario)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.DetalheDeVenda.OrdemDeVenda)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.DetalheDeVenda.OrdemDeVenda.Id)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.DetalheDeVenda.Produto)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.DetalheDeVenda.Produto.Id)
+                </dd>
+            </dl> 
+            
+            <div class="modal-footer">       
+                <div class="col-md-offset-2 col-md-10">
+                    <form asp-action="ExcluirProduto">
+                        <input type="hidden" asp-for="DetalheDeVenda.Id" />
+                        <input type="submit" value="Excluir Produto" class="btn btn-danger" /> |
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </form>
+                </div>
+            </div>                       
+    </div>
+
+
+
+   
+
+
+
