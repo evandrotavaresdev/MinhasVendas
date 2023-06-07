@@ -22,7 +22,7 @@ namespace MinhasVendas.App.Controllers
         // GET: TransacaoDeEstoques
         public async Task<IActionResult> Index()
         {
-            var appEstoquesEVendasContext = _context.TransacaoDeEstoques.Include(t => t.OrdemDeCompras).Include(t => t.OrdemDeVendas).Include(t => t.Produto);
+            var appEstoquesEVendasContext = _context.TransacaoDeEstoques.Include(t => t.OrdemDeCompra).Include(t => t.OrdemDeVenda).Include(t => t.Produto);
             return View(await appEstoquesEVendasContext.ToListAsync());
         }
 
@@ -35,8 +35,8 @@ namespace MinhasVendas.App.Controllers
             }
 
             var transacaoDeEstoque = await _context.TransacaoDeEstoques
-                .Include(t => t.OrdemDeCompras)
-                .Include(t => t.OrdemDeVendas)
+                .Include(t => t.OrdemDeCompra)
+                .Include(t => t.OrdemDeVenda)
                 .Include(t => t.Produto)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (transacaoDeEstoque == null)
@@ -141,8 +141,8 @@ namespace MinhasVendas.App.Controllers
             }
 
             var transacaoDeEstoque = await _context.TransacaoDeEstoques
-                .Include(t => t.OrdemDeCompras)
-                .Include(t => t.OrdemDeVendas)
+                .Include(t => t.OrdemDeCompra)
+                .Include(t => t.OrdemDeVenda)
                 .Include(t => t.Produto)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (transacaoDeEstoque == null)

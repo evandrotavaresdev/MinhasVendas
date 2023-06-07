@@ -19,8 +19,8 @@ namespace MinhasVendas.App.Models
 
         /*Ef Relacionamento */
         public Produto? Produto { get; set; }
-        public OrdemDeCompra? OrdemDeCompras { get; set; }
-        public OrdemDeVenda? OrdemDeVendas { get; set; }
+        public OrdemDeCompra? OrdemDeCompra { get; set; }
+        public OrdemDeVenda? OrdemDeVenda { get; set; }
 
     }
 }

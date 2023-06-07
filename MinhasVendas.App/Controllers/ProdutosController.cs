@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Models;
+using MinhasVendas.App.Models.Enums;
 
 namespace MinhasVendas.App.Controllers
 {
@@ -22,9 +23,26 @@ namespace MinhasVendas.App.Controllers
         // GET: Produtos
         public async Task<IActionResult> Index()
         {
-              return _context.Produtos != null ? 
-                          View(await _context.Produtos.ToListAsync()) :
-                          Problem("Entity set 'AppEstoquesEVendasContext.Produtos'  is null.");
+            var qtdCompraEVenda =
+                      from produto in _context.TransacaoDeEstoques
+                      group produto by produto.ProdutoId into produtoGroup
+                      select new
+                      {
+                          produtoGroup.Key,
+                          totalProdutoComprado = produtoGroup.Where(p => p.TipoDransacaoDeEstoque == TipoDransacaoDeEstoque.Compra).Sum(p => p.Quantidade),
+                          totalProdutoVendido = produtoGroup.Where(p => p.TipoDransacaoDeEstoque == TipoDransacaoDeEstoque.Venda).Sum(p => p.Quantidade)
+                      };
+
+            var produtos = await _context.Produtos.ToListAsync();
+
+            foreach (var produto in qtdCompraEVenda)
+            {
+                var item = produtos.Find(p => p.Id == produto.Key);
+                item.EstoqueAtual = produto.totalProdutoComprado - produto.totalProdutoVendido;
+            }
+            return _context.Produtos != null ? 
+                          View(produtos) :
+                          Problem("Entity set 'MinhasVendasContext.Produtos'  is null.");
         }
 
         // GET: Produtos/Details/5
