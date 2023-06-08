@@ -52,8 +52,7 @@ namespace MinhasVendas.App.Controllers
                                  });
            
             ViewData["ProdutoId"] = new SelectList(listaProdutos, "Id", "ProdutoCompleto");            
-            ViewData["OrdemDeVendaId"] = id;
-            ViewData["TransacaoDeEstoqueId"] = new SelectList(_context.TransacaoDeEstoques, "Id", "Id");
+            ViewData["OrdemDeVendaId"] = id;           
 
             CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
 

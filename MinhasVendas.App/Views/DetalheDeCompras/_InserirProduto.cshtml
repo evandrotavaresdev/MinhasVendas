@@ -1,0 +1,45 @@
+﻿@model MinhasVendas.App.ViewModels.CarrinhoDeComprasViewModel
+
+@{
+    ViewData["Title"] = "Inserir Produto";
+}
+
+    <div class="modal-header">
+        <h5 class="modal-title">@ViewData["Title"]</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>     
+    </div>
+
+<form asp-action="InserirProduto" id="inserirProdutoForm">
+    
+    <div class="modal-body">    
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        
+        <div class="form-group">
+            <label asp-for="@Model.DetalheDeCompra.OrdemDeCompraId" class="control-label"></label>
+            <input readonly asp-for="@Model.DetalheDeCompra.OrdemDeCompraId" class="form-control" value=@ViewBag.OrdemDeCompraId>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.DetalheDeCompra.ProdutoId" class="control-label"></label>
+            <select asp-for="@Model.DetalheDeCompra.ProdutoId" class="form-control" asp-items="ViewBag.ProdutoId"></select>
+        </div>        
+        <div class="form-group">
+            <label asp-for="@Model.DetalheDeCompra.Quantidade" class="control-label"></label>
+            <input asp-for="@Model.DetalheDeCompra.Quantidade" class="form-control" />
+            <span asp-validation-for="@Model.DetalheDeCompra.Quantidade" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.DetalheDeCompra.CustoUnitario" class="control-label"></label>
+            <input asp-for="@Model.DetalheDeCompra.CustoUnitario" class="form-control" />
+            <span asp-validation-for="@Model.DetalheDeCompra.CustoUnitario" class="text-danger"></span>
+        </div>                  
+        <div class="modal-footer">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Inserir Produto" class="btn btn-success" />
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    
+    </div>
+</form>
+
+

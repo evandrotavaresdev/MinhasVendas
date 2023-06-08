@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Models;
+using MinhasVendas.App.ViewModels;
 
 namespace MinhasVendas.App.Controllers
 {
@@ -18,12 +19,51 @@ namespace MinhasVendas.App.Controllers
         {
             _context = context;
         }
+        public async Task<IActionResult> CarrinhoDeCompras(int? id)
+        {
+            if (id == null || _context.OrdemDeCompras == null)
+            {
+                return NotFound();
+            }
+
+            var ordemDeCompra = await _context.OrdemDeCompras
+                 .Include(c => c.Fornecedor)
+                 .Include(c => c.DetalheDeCompras).ThenInclude(v => v.Produto)
+                 .FirstOrDefaultAsync(m => m.Id == id);
+
+
+            if (ordemDeCompra == null)
+            {
+                return NotFound();
+            }
+
+
+            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "NomeProduto");
+
+            var model = new CarrinhoDeComprasViewModel();
+            model.OrdemDeCompra = ordemDeCompra;
+
+            if (ordemDeCompra.DetalheDeCompras.Any())
+            {
+                var precoProduto = from item in model.OrdemDeCompra.DetalheDeCompras select (item.CustoUnitario * item.Quantidade);
+                decimal[] precoProdutos = precoProduto.ToArray();
+                decimal totalCompra = precoProdutos.Aggregate((a, b) => a + b);
+                model.TotalCompra = totalCompra;
+
+                var itens = from item in model.OrdemDeCompra.DetalheDeCompras select (item.Quantidade);
+                int totalItens = itens.Sum();
+                model.TotalItens = totalItens;
+            }
+
+
+            return View(model);
+        }
 
         // GET: OrdemDeCompras
         public async Task<IActionResult> Index()
         {
-            var appEstoquesEVendasContext = _context.OrdemDeCompras.Include(o => o.Fornecedor);
-            return View(await appEstoquesEVendasContext.ToListAsync());
+            var minhasVendasAppContext = _context.OrdemDeCompras.Include(o => o.Fornecedor);
+            return View(await minhasVendasAppContext.ToListAsync());
         }
 
         // GET: OrdemDeCompras/Details/5
@@ -57,7 +97,7 @@ namespace MinhasVendas.App.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FornecedorId")] OrdemDeCompra ordemDeCompra)
+        public async Task<IActionResult> Create([Bind("Id,FornecedorId,DataDeCriacao,StatusOrdemDeCompra,ValorDeFrete")] OrdemDeCompra ordemDeCompra)
         {
             if (ModelState.IsValid)
             {
@@ -91,7 +131,7 @@ namespace MinhasVendas.App.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FornecedorId")] OrdemDeCompra ordemDeCompra)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FornecedorId,DataDeCriacao,StatusOrdemDeCompra,ValorDeFrete")] OrdemDeCompra ordemDeCompra)
         {
             if (id != ordemDeCompra.Id)
             {
@@ -148,7 +188,7 @@ namespace MinhasVendas.App.Controllers
         {
             if (_context.OrdemDeCompras == null)
             {
-                return Problem("Entity set 'AppEstoquesEVendasContext.OrdemDeCompras'  is null.");
+                return Problem("Entity set 'MinhasVendasAppContext.OrdemDeCompras'  is null.");
             }
             var ordemDeCompra = await _context.OrdemDeCompras.FindAsync(id);
             if (ordemDeCompra != null)

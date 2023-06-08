@@ -27,8 +27,6 @@
             </div>
             <div class="form-group">
                 <label asp-for="Quantidade" class="control-label"></label>
-
-
                 <input asp-for="Quantidade" class="form-control" />
                 <span asp-validation-for="Quantidade" class="text-danger"></span>
             </div>
@@ -36,6 +34,16 @@
                 <label asp-for="CustoUnitario" class="control-label"></label>
                 <input asp-for="CustoUnitario" class="form-control" />
                 <span asp-validation-for="CustoUnitario" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DataDeRecebimento" class="control-label"></label>
+                <input asp-for="DataDeRecebimento" class="form-control" />
+                <span asp-validation-for="DataDeRecebimento" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="RegistradoTransacaoDeEstoque" /> @Html.DisplayNameFor(model => model.RegistradoTransacaoDeEstoque)
+                </label>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

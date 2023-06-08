@@ -22,6 +22,12 @@
                 @Html.DisplayNameFor(model => model.CustoUnitario)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.DataDeRecebimento)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RegistradoTransacaoDeEstoque)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Produto)
             </th>
             <th>
@@ -41,6 +47,12 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CustoUnitario)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DataDeRecebimento)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RegistradoTransacaoDeEstoque)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Produto.Id)

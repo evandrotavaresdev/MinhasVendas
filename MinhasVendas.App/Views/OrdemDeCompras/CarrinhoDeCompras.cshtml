@@ -1,0 +1,180 @@
+﻿@model MinhasVendas.App.ViewModels.CarrinhoDeComprasViewModel
+
+@{
+    ViewData["Title"] = "Carrinho de Compras";
+}
+
+<h1>Carrinho de Compras</h1>
+
+<div>
+    <h4>OrdemDeCompra</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeCompra.DataDeCriacao)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeCompra.DataDeCriacao)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeCompra.StatusOrdemDeCompra)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeCompra.StatusOrdemDeCompra)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeCompra.ValorDeFrete)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeCompra.ValorDeFrete)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrdemDeCompra.Fornecedor)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrdemDeCompra.Fornecedor.Id)
+        </dd>
+    </dl>
+</div>
+<br />
+
+<strong>Total da Compra: @Model.TotalCompra</strong>
+<strong>Total de Itens: @Model.TotalItens</strong>
+
+<div>
+    <div style="float:left">
+        <button class="btn btn-primary" onclick="InserirProduto(@Model.OrdemDeCompra.Id)">Inserir Produto</button>
+    </div>
+</div>
+
+<div>
+    <div style="float:left">
+        <button class="btn btn-primary" onclick="FinalizarVenda(@Model.OrdemDeCompra.Id)">Finalizar Compra</button>
+    </div>
+</div>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.Name("Produto")
+            </th>
+            <th>
+                @Html.Name("Quantidade")
+            </th>
+            <th>
+                @Html.Name("CustoUnitarioUnitario")
+            </th>         
+            <th>
+                @Html.Name("TotalProduto")
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrdemDeCompra.DetalheDeCompras)
+        {
+            var produtoTotal = item.Quantidade * item.CustoUnitario;
+
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Produto.Nome)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantidade)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CustoUnitario)
+                </td>               
+                <td>
+                    @Html.DisplayFor(modelItem => produtoTotal)
+                </td>
+                <td>
+                    <div style="float:left">
+                        <button class="btn btn-primary" onclick="ExcluirProduto(@item.Id)">Excluir Produto</button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.OrdemDeCompra.Id">Editar</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<div class="modal fade" id="inserirProdutoFormModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="inserirProdutoFormModelDiv"> </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ExcluirProdutoFormModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="ExcluirProdutoFormModelDiv"> </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="finalizarVendaFormModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="finalizarVendaFormModelDiv"> </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }
+
+<script>
+
+    var InserirProduto = function (vendaId) {
+
+        var vendaId = vendaId;
+        var action = "/DetalheDeCompras/InserirProduto/";
+        var url = action + vendaId;
+
+        $("#inserirProdutoFormModelDiv").load(url, function () {
+            $("#inserirProdutoFormModel").modal("show");
+
+            var form = document.getElementById("inserirProdutoForm");
+            $.validator.unobtrusive.parse(inserirProdutoForm);
+        });
+
+    }
+
+    var ExcluirProduto = function (id) {
+
+        var id = id;
+        var action = "/DetalheDeCompras/ExcluirProduto/";
+        var url = action + id;
+
+        $("#ExcluirProdutoFormModelDiv").load(url, function () {
+            $("#ExcluirProdutoFormModel").modal("show");
+        });
+    }
+
+    var FinalizarVenda = function (vendaId) {
+
+        var vendaId = vendaId;
+        var action = "/DetalheDeCompras/FinalizarVenda/";
+        var url = action + vendaId;
+
+        $("#finalizarVendaFormModelDiv").load(url, function () {
+            $("#finalizarVendaFormModel").modal("show");
+
+            var form = document.getElementById("finalizarVendaForm");
+            $.validator.unobtrusive.parse(finalizarVendaForm);
+        });
+
+    }
+</script>
+
