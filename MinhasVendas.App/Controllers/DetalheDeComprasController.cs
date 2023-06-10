@@ -36,7 +36,7 @@ namespace MinhasVendas.App.Controllers
                                      Id = c.Id,
                                      NomeProtudo = c.Nome,
                                      Preco = c.PrecoBase,
-                                     ProdutoCompleto = c.Nome + " | " + "Valor: R$ " + " " + c.PrecoBase
+                                     ProdutoCompleto = c.Nome + " | " + "Custo: R$ " + " " + c.PrecoBase
                                  });
 
             ViewData["ProdutoId"] = new SelectList(listaProdutos, "Id", "ProdutoCompleto");
@@ -81,7 +81,7 @@ namespace MinhasVendas.App.Controllers
             return View(model);
         }
 
-        // GET: VendasDetalhes/Delete/5
+       [HttpGet]
         public async Task<IActionResult> ExcluirProduto(int? id)
         {
             if (id == null || _context.DetalheDeVendas == null)
@@ -89,78 +89,76 @@ namespace MinhasVendas.App.Controllers
                 return NotFound();
             }
 
-            var detalheDeVenda = await _context.DetalheDeVendas
+            var detalheDeCompra = await _context.DetalheDeCompras
                 .Include(v => v.Produto)
-                .Include(v => v.OrdemDeVenda)
+                .Include(v => v.OrdemDeCompra)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (detalheDeVenda == null)
+            if (detalheDeCompra == null)
             {
                 return NotFound();
             }
 
-            CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
-            model.DetalheDeVenda = detalheDeVenda;
+            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+            model.DetalheDeCompra = detalheDeCompra;
 
             return PartialView("_ExcluirProduto", model);
         }
-
-        // POST: VendasDetalhes/Delete/5
+        
         [HttpPost, ActionName("ExcluirProduto")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmarExclusao(int id)
         {
-            if (_context.DetalheDeVendas == null)
+            if (_context.DetalheDeCompras == null)
             {
                 return Problem("Entity set 'AuroraCollabContext.VendaDetalhe'  is null.");
             }
-            var detalheDeVenda = await _context.DetalheDeVendas.FindAsync(id);
-            if (detalheDeVenda != null)
+            var detalheDeCompra = await _context.DetalheDeCompras.FindAsync(id);
+            if (detalheDeCompra != null)
             {
-                _context.DetalheDeVendas.Remove(detalheDeVenda);
+                _context.DetalheDeCompras.Remove(detalheDeCompra);
 
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction("CarrinhoDeVendas", "OrdemDeVendas", new { id = detalheDeVenda.OrdemDeVendaId });
+            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
         }
-
+        [HttpGet]
         public async Task<IActionResult> FinalizarVenda(int id)
         {
-            var ordemDeVenda = await _context.OrdemDeVendas
-                 .Include(v => v.DetalheDeVendas)
+            var ordemDeCompra = await _context.OrdemDeCompras
+                 .Include(v => v.DetalheDeCompras)
                  .FirstOrDefaultAsync(v => v.Id == id);
 
-            ViewData["OrdemDeVendaId"] = id;
-            CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
+            ViewData["OrdemDeCompraId"] = id;
+            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
 
-            if (ordemDeVenda.DetalheDeVendas.Any())
+            if (ordemDeCompra.DetalheDeCompras.Any())
             {
-                var precoProduto = from item in ordemDeVenda.DetalheDeVendas select (item.PrecoUnitario * item.Quantidade * (1 - item.Desconto / 100));
-                decimal[] precoProdutos = precoProduto.ToArray();
-                decimal totalVenda = precoProdutos.Aggregate((a, b) => a + b);
-                model.TotalVenda = totalVenda;
+                var custoProduto = from item in ordemDeCompra.DetalheDeCompras select (item.CustoUnitario * item.Quantidade);
+                decimal[] custoProdutos = custoProduto.ToArray();
+                decimal totalCompra= custoProdutos.Aggregate((a, b) => a + b);
+                model.TotalCompra = totalCompra;
             }
-
             return PartialView("_FinalizarVenda", model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> FinalizarVenda(CarrinhoDeVendasViewModel model)
+        public async Task<IActionResult> FinalizarVenda(CarrinhoDeComprasViewModel model)
         {
-            var ordemDeVenda = await _context.OrdemDeVendas.FindAsync(model.DetalheDeVenda.OrdemDeVendaId);
-            if (ordemDeVenda == null)
+            var ordemDeCompra = await _context.OrdemDeCompras.FindAsync(model.DetalheDeCompra.OrdemDeCompraId);
+            if (ordemDeCompra == null)
             {
                 return NotFound("Erro ao finalizar a Venda.");
             }
 
-            ordemDeVenda.StatusOrdemDeVenda = StatusOrdemDeVenda.Vendido;
-            ordemDeVenda.FormaDePagamento = model.OrdemDeVenda.FormaDePagamento;
+            ordemDeCompra.StatusOrdemDeCompra = StatusOrdemDeCompra.Aprovado;
+            ordemDeCompra.FormaDePagamento = model.OrdemDeCompra.FormaDePagamento;
 
-            _context.Update(ordemDeVenda);
+            _context.Update(ordemDeCompra);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("CarrinhoDeVendas", "OrdemDeVendas", new { id = ordemDeVenda.Id });
+            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
 
         }
         /* */

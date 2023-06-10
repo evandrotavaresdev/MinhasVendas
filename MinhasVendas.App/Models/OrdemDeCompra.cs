@@ -9,6 +9,7 @@ namespace MinhasVendas.App.Models
         public int FornecedorId { get; set; }
         public DateTime DataDeCriacao { get; set; }
         public StatusOrdemDeCompra StatusOrdemDeCompra { get; set; }
+        public FormaDePagamento FormaDePagamento { get; set; }
         public Decimal ValorDeFrete { get; set; }
 
 
