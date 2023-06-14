@@ -1,14 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MinhasVendas.App.Data;
+using MinhasVendas.App.Interfaces;
+using MinhasVendas.App.Notificador;
+using MinhasVendas.App.Servicos;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MinhasVendasAppContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MinhasVendasAppContext") ?? throw new InvalidOperationException("Connection string 'MinhasVendasAppContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<INotificador, Notificador>();
+builder.Services.AddScoped<IProdutoServico, ProdutoServico>();
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

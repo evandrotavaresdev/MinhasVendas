@@ -6,18 +6,23 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
+using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Models.Enums;
 
 namespace MinhasVendas.App.Controllers
 {
-    public class ProdutosController : Controller
+    public class ProdutosController : BaseController
     {
         private readonly MinhasVendasAppContext _context;
+        private readonly IProdutoServico _produtoServico;
 
-        public ProdutosController(MinhasVendasAppContext context)
+        public ProdutosController(MinhasVendasAppContext context,
+                                  INotificador notificador,
+                                  IProdutoServico produtoServico) : base(notificador)
         {
             _context = context;
+            _produtoServico = produtoServico;
         }
 
         // GET: Produtos
@@ -76,13 +81,13 @@ namespace MinhasVendas.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,PrecoDeLista,PrecoBase")] Produto produto)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(produto);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(produto);
+            if (!ModelState.IsValid) return View(produto);
+
+            await _produtoServico.Adicionar(produto);
+
+            if (!OperacaoValida()) return View(produto);
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Produtos/Edit/5

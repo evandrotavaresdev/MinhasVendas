@@ -47,7 +47,7 @@ namespace MinhasVendas.App.Controllers
             {
                 var precoProduto = from item in model.OrdemDeCompra.DetalheDeCompras select (item.CustoUnitario * item.Quantidade);
                 decimal[] precoProdutos = precoProduto.ToArray();
-                decimal totalCompra = precoProdutos.Aggregate((a, b) => a + b);
+                decimal totalCompra = precoProdutos.Aggregate((a, b) => a + b) + ordemDeCompra.ValorDeFrete;
                 model.TotalCompra = totalCompra;
 
                 var itens = from item in model.OrdemDeCompra.DetalheDeCompras select (item.Quantidade);
