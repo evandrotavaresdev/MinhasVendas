@@ -43,16 +43,10 @@
 
 <div>
     <div style="float:left">
-        <button class="btn btn-primary" onclick="InserirProduto(@Model.OrdemDeCompra.Id)">Inserir Produto</button>
+        <button class="btn btn-info" onclick="InserirProduto(@Model.OrdemDeCompra.Id)">Inserir Produto</button>
+        <button class="btn btn-dark" onclick="FinalizarVenda(@Model.OrdemDeCompra.Id)">Finalizar Compra</button>
     </div>
 </div>
-
-<div>
-    <div style="float:left">
-        <button class="btn btn-primary" onclick="FinalizarVenda(@Model.OrdemDeCompra.Id)">Finalizar Compra</button>
-    </div>
-</div>
-
 
 <table class="table">
     <thead>
@@ -69,7 +63,12 @@
             <th>
                 @Html.Name("TotalProduto")
             </th>
-            <th></th>
+            <th>
+                @Html.Name("DataRecebimento")
+            </th>
+            <th>
+                @Html.Name("StatusRecebimento")
+            </th>            
         </tr>
     </thead>
     <tbody>
@@ -91,8 +90,19 @@
                     @Html.DisplayFor(modelItem => produtoTotal)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.DataDeRecebimento)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RegistradoTransacaoDeEstoque)
+                </td>
+                <td>
                     <div style="float:left">
-                        <button class="btn btn-primary" onclick="ExcluirProduto(@item.Id)">Excluir Produto</button>
+                        <button class="btn btn-danger" onclick="ExcluirProduto(@item.Id)">Excluir Produto</button>
+                    </div>
+                </td>
+                <td>
+                    <div style="float:left">
+                        <button class="btn btn-warning" onclick="ReceberProduto(@item.Id)">Receber Produto</button>
                     </div>
                 </td>
             </tr>
@@ -124,6 +134,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div id="finalizarVendaFormModelDiv"> </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="receberProdutoFormModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id="receberProdutoFormModelDiv"> </div>
         </div>
     </div>
 </div>
@@ -162,6 +180,17 @@
         });
     }
 
+    var ReceberProduto = function (id) {
+
+        var id = id;
+        var action = "/DetalheDeCompras/ReceberProduto/";
+        var url = action + id;
+
+        $("#receberProdutoFormModelDiv").load(url, function () {
+            $("#receberProdutoFormModel").modal("show");
+        });
+    }
+
     var FinalizarVenda = function (vendaId) {
 
         var vendaId = vendaId;
@@ -175,6 +204,7 @@
             $.validator.unobtrusive.parse(finalizarVendaForm);
         });
 
+           
     }
 </script>
 

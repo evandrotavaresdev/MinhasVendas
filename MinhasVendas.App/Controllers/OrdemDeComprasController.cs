@@ -88,7 +88,7 @@ namespace MinhasVendas.App.Controllers
         // GET: OrdemDeCompras/Create
         public IActionResult Create()
         {
-            ViewData["FornecedorId"] = new SelectList(_context.Fornecedores, "Id", "Id");
+            ViewData["FornecedorId"] = new SelectList(_context.Fornecedores, "Id", "Nome");
             return View();
         }
 

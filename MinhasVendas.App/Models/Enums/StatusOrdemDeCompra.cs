@@ -3,7 +3,7 @@
     public enum StatusOrdemDeCompra
     {
         Solicitado = 0,
-        Aprovado = 1
-        
+        Aprovado = 1,
+        Fechado = 2        
     }
 }

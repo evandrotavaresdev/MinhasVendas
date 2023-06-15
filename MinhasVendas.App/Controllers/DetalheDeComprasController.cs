@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Models.Enums;
@@ -64,8 +65,8 @@ namespace MinhasVendas.App.Controllers
                 await _context.SaveChangesAsync();  
 
                 detalheDeCompra.TransacaoDeEstoqueId = transacaoDeEstoque.Id;
-                detalheDeCompra.DataDeRecebimento = DateTime.Now;
-                detalheDeCompra.RegistradoTransacaoDeEstoque = true;
+                //detalheDeCompra.DataDeRecebimento = DateTime.Now;
+                //detalheDeCompra.RegistradoTransacaoDeEstoque = true;
 
                 _context.Add(detalheDeCompra);
                 await _context.SaveChangesAsync();
@@ -81,7 +82,58 @@ namespace MinhasVendas.App.Controllers
             return View(model);
         }
 
-       [HttpGet]
+
+        [HttpGet]
+        public async Task<IActionResult> ReceberProduto(int? id)
+        {
+
+
+            if (id == null || _context.DetalheDeVendas == null)
+            {
+                return NotFound();
+            }
+
+            var detalheDeCompra = await _context.DetalheDeCompras
+                .Include(v => v.Produto)
+                .Include(v => v.OrdemDeCompra)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (detalheDeCompra == null)
+            {
+                return NotFound();
+            }
+
+            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+            model.DetalheDeCompra = detalheDeCompra;
+
+            return PartialView("_ReceberProduto", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReceberProduto(CarrinhoDeComprasViewModel carrinhoDeComprasViewModel)
+        {
+
+
+            var itemDetalheDeCompra = await _context.DetalheDeCompras.FindAsync(carrinhoDeComprasViewModel.DetalheDeCompra.Id);
+                                        
+                                     
+            if (itemDetalheDeCompra == null)
+            {
+                return NotFound("Erro ao Receber o Produo.");
+            }
+
+            itemDetalheDeCompra.DataDeRecebimento = carrinhoDeComprasViewModel.DetalheDeCompra.DataDeRecebimento;
+            itemDetalheDeCompra.RegistradoTransacaoDeEstoque = true;
+
+            _context.Update(itemDetalheDeCompra);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = itemDetalheDeCompra.OrdemDeCompraId });
+        }
+
+
+        [HttpGet]
         public async Task<IActionResult> ExcluirProduto(int? id)
         {
             if (id == null || _context.DetalheDeVendas == null)
@@ -161,6 +213,8 @@ namespace MinhasVendas.App.Controllers
             return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
 
         }
+
+
         /* */
 
         // GET: DetalheDeCompras
