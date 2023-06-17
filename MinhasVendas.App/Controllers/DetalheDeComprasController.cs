@@ -7,19 +7,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MinhasVendas.App.Data;
+using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Models.Enums;
 using MinhasVendas.App.ViewModels;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MinhasVendas.App.Controllers
 {
-    public class DetalheDeComprasController : Controller
+    public class DetalheDeComprasController : BaseController
     {
         private readonly MinhasVendasAppContext _context;
+        private readonly IDetalheDeCompraServico _detalheDeCompraServico;
 
-        public DetalheDeComprasController(MinhasVendasAppContext context)
+        public DetalheDeComprasController(MinhasVendasAppContext context,
+                                          IDetalheDeCompraServico detalheDeCompraServico,
+                                          INotificador notificador) : base(notificador)
         {
             _context = context;
+            _detalheDeCompraServico = detalheDeCompraServico;
         }
 
         [HttpGet]
@@ -51,25 +57,12 @@ namespace MinhasVendas.App.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> InserirProduto([Bind("Id,OrdemDeCompraId,ProdutoId,Quantidade,CustoUnitario")] DetalheDeCompra detalheDeCompra)
-        {
+        {           
             if (ModelState.IsValid)
-            {                             
-                TransacaoDeEstoque transacaoDeEstoque = new TransacaoDeEstoque();
-                transacaoDeEstoque.ProdutoId = detalheDeCompra.ProdutoId;
-                transacaoDeEstoque.OrdemDeCompraId = detalheDeCompra.OrdemDeCompraId;
-                transacaoDeEstoque.TipoDransacaoDeEstoque = TipoDransacaoDeEstoque.Compra;
-                transacaoDeEstoque.DataDeTransacao = DateTime.Now;
-                transacaoDeEstoque.Quantidade = detalheDeCompra.Quantidade;
-
-                _context.TransacaoDeEstoques.Add(transacaoDeEstoque);
-                await _context.SaveChangesAsync();  
-
-                detalheDeCompra.TransacaoDeEstoqueId = transacaoDeEstoque.Id;
-                //detalheDeCompra.DataDeRecebimento = DateTime.Now;
-                //detalheDeCompra.RegistradoTransacaoDeEstoque = true;
-
+            {                                            
                 _context.Add(detalheDeCompra);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
             }
 
@@ -79,7 +72,7 @@ namespace MinhasVendas.App.Controllers
             CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
             model.DetalheDeCompra = detalheDeCompra;
 
-            return View(model);
+            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
         }
 
 
@@ -115,31 +108,41 @@ namespace MinhasVendas.App.Controllers
         {
 
 
-            var itemDetalheDeCompra = await _context.DetalheDeCompras.FindAsync(carrinhoDeComprasViewModel.DetalheDeCompra.Id);
+            var detalheDeCompra = await _context.DetalheDeCompras.FindAsync(carrinhoDeComprasViewModel.DetalheDeCompra.Id);
                                         
                                      
-            if (itemDetalheDeCompra == null)
+            if (detalheDeCompra == null)
             {
                 return NotFound("Erro ao Receber o Produo.");
             }
 
-            itemDetalheDeCompra.DataDeRecebimento = carrinhoDeComprasViewModel.DetalheDeCompra.DataDeRecebimento;
-            itemDetalheDeCompra.RegistradoTransacaoDeEstoque = true;
-
-            _context.Update(itemDetalheDeCompra);
+            detalheDeCompra.DataDeRecebimento = carrinhoDeComprasViewModel.DetalheDeCompra.DataDeRecebimento;
+            detalheDeCompra.RegistradoTransacaoDeEstoque = true;
+            _context.Update(detalheDeCompra);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = itemDetalheDeCompra.OrdemDeCompraId });
+            TransacaoDeEstoque transacaoDeEstoque = new TransacaoDeEstoque();
+            transacaoDeEstoque.ProdutoId = detalheDeCompra.ProdutoId;
+            transacaoDeEstoque.OrdemDeCompraId = detalheDeCompra.OrdemDeCompraId;
+            transacaoDeEstoque.TipoDransacaoDeEstoque = TipoDransacaoDeEstoque.Compra;
+            transacaoDeEstoque.DataDeTransacao = DateTime.Now;
+            transacaoDeEstoque.Quantidade = detalheDeCompra.Quantidade;
+            _context.Add(transacaoDeEstoque);
+            await _context.SaveChangesAsync();
+           
+            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
         }
 
 
         [HttpGet]
-        public async Task<IActionResult> ExcluirProduto(int? id)
+        public async Task<IActionResult> ExcluirProduto(int id)
         {
             if (id == null || _context.DetalheDeVendas == null)
             {
                 return NotFound();
             }
+
+            
 
             var detalheDeCompra = await _context.DetalheDeCompras
                 .Include(v => v.Produto)
@@ -153,6 +156,7 @@ namespace MinhasVendas.App.Controllers
 
             CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
             model.DetalheDeCompra = detalheDeCompra;
+            await _detalheDeCompraServico.VerificarStatus(id);
 
             return PartialView("_ExcluirProduto", model);
         }
@@ -161,19 +165,20 @@ namespace MinhasVendas.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmarExclusao(int id)
         {
-            if (_context.DetalheDeCompras == null)
-            {
-                return Problem("Entity set 'AuroraCollabContext.VendaDetalhe'  is null.");
-            }
+            if (_context.DetalheDeCompras == null) return Problem("Entity set 'AuroraCollabContext.VendaDetalhe'  is null.");
+            
             var detalheDeCompra = await _context.DetalheDeCompras.FindAsync(id);
-            if (detalheDeCompra != null)
-            {
-                _context.DetalheDeCompras.Remove(detalheDeCompra);
+            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+            model.DetalheDeCompra = detalheDeCompra;
 
-            }
+            await _detalheDeCompraServico.Remover(id);
+                       
 
-            await _context.SaveChangesAsync();
+            if (!OperacaoValida()) return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
+
             return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
+            
+
         }
         [HttpGet]
         public async Task<IActionResult> FinalizarVenda(int id)

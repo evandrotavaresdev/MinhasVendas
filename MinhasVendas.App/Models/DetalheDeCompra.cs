@@ -10,7 +10,7 @@
         
         public int Quantidade { get; set; }
         public decimal CustoUnitario { get; set; }
-        public DateTime DataDeRecebimento {  get; set; }
+        public DateTime? DataDeRecebimento {  get; set; }
         public bool RegistradoTransacaoDeEstoque { get; set; }
 
         /* EF Relacionamento */

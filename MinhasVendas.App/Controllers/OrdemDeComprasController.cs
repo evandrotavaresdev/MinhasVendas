@@ -6,16 +6,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
+using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.ViewModels;
 
 namespace MinhasVendas.App.Controllers
 {
-    public class OrdemDeComprasController : Controller
+    public class OrdemDeComprasController : BaseController
     {
         private readonly MinhasVendasAppContext _context;
 
-        public OrdemDeComprasController(MinhasVendasAppContext context)
+        public OrdemDeComprasController(MinhasVendasAppContext context,
+                                        INotificador notificador) : base(notificador)
         {
             _context = context;
         }

@@ -10,6 +10,7 @@ ViewData["Title"] = "Excluir Produto";
 </div>
 
 <form asp-action="ExcluirProduto"> 
+    <vc:resumo></vc:resumo>
     <input type="hidden" asp-for="DetalheDeCompra.Id" />    
     <div class="modal-body">                                     
         <dl class="row">

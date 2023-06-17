@@ -11,8 +11,12 @@ builder.Services.AddDbContext<MinhasVendasAppContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddScoped<INotificador, Notificador>();
+
 builder.Services.AddScoped<IProdutoServico, ProdutoServico>();
+builder.Services.AddScoped<IDetalheDeCompraServico, DetalheDeCompraServico>();
+builder.Services.
 
 var app = builder.Build();
 
