@@ -15,11 +15,14 @@ namespace MinhasVendas.App.Controllers
     public class OrdemDeComprasController : BaseController
     {
         private readonly MinhasVendasAppContext _context;
+        private readonly IOrdemDeCompraServico _ordemDeCompraServico;
 
         public OrdemDeComprasController(MinhasVendasAppContext context,
+                                        IOrdemDeCompraServico ordemDeCompraServico,
                                         INotificador notificador) : base(notificador)
         {
             _context = context;
+            _ordemDeCompraServico = ordemDeCompraServico;
         }
         public async Task<IActionResult> CarrinhoDeCompras(int? id)
         {
@@ -101,14 +104,18 @@ namespace MinhasVendas.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,FornecedorId,DataDeCriacao,StatusOrdemDeCompra,ValorDeFrete")] OrdemDeCompra ordemDeCompra)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(ordemDeCompra);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
             ViewData["FornecedorId"] = new SelectList(_context.Fornecedores, "Id", "Id", ordemDeCompra.FornecedorId);
-            return View(ordemDeCompra);
+         
+            if (!ModelState.IsValid) return View(ordemDeCompra);
+                               
+            await _ordemDeCompraServico.Adicionar(ordemDeCompra);
+            
+            if (!OperacaoValida()) return View(ordemDeCompra);
+
+            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
+           // return RedirectToAction(nameof(Index));
+            
+            
         }
 
         // GET: OrdemDeCompras/Edit/5

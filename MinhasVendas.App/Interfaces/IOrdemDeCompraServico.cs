@@ -1,4 +1,4 @@
-﻿using MinhasVendas.App.Migrations;
+﻿using MinhasVendas.App.Models;
 
 namespace MinhasVendas.App.Interfaces
 {
