@@ -10,6 +10,7 @@ using MinhasVendas.App.Data;
 using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Models.Enums;
+using MinhasVendas.App.Notificador;
 using MinhasVendas.App.ViewModels;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -31,11 +32,13 @@ namespace MinhasVendas.App.Controllers
         [HttpGet]
         public async Task<IActionResult> InserirProduto(int id)
         {
-           
+            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+
+            await _detalheDeCompraServico.InserirProdutoStatus(id);
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeCompraFechada", model);
 
             var produtos = await _context.Produtos.ToListAsync();
-
-         
 
             var listaProdutos = (from c in produtos
                                  select new
@@ -47,9 +50,7 @@ namespace MinhasVendas.App.Controllers
                                  });
 
             ViewData["ProdutoId"] = new SelectList(listaProdutos, "Id", "ProdutoCompleto");
-            ViewData["OrdemDeCompraId"] = id;
-          
-            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+            ViewData["OrdemDeCompraId"] = id;                     
 
             return PartialView("_InserirProduto", model);
         }
@@ -57,31 +58,35 @@ namespace MinhasVendas.App.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> InserirProduto([Bind("Id,OrdemDeCompraId,ProdutoId,Quantidade,CustoUnitario")] DetalheDeCompra detalheDeCompra)
-        {           
-            if (ModelState.IsValid)
-            {                                            
-                _context.Add(detalheDeCompra);
-                await _context.SaveChangesAsync();
+        {
 
+            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+
+            if (!ModelState.IsValid)
+            {
+                ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "Id", detalheDeCompra.ProdutoId);
+                ViewData["OrdemDeCompraId"] = new SelectList(_context.OrdemDeVendas, "Id", "Id", detalheDeCompra.OrdemDeCompraId);
+
+                model.DetalheDeCompra = detalheDeCompra;
+               
                 return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
             }
 
-            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "Id", detalheDeCompra.ProdutoId);           
-            ViewData["OrdemDeCompraId"] = new SelectList(_context.OrdemDeVendas, "Id", "Id", detalheDeCompra.OrdemDeCompraId);
+            await _detalheDeCompraServico.Adicionar(detalheDeCompra);
 
-            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
-            model.DetalheDeCompra = detalheDeCompra;
+            if  (!OperacaoValida()) return PartialView("_OrdemDeCompraFechada", model);
 
             return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
+                           
         }
 
 
         [HttpGet]
-        public async Task<IActionResult> ReceberProduto(int? id)
+        public async Task<IActionResult> ReceberProduto(int id)
         {
 
 
-            if (id == null || _context.DetalheDeVendas == null)
+            if (_context.DetalheDeVendas == null)
             {
                 return NotFound();
             }
@@ -97,6 +102,11 @@ namespace MinhasVendas.App.Controllers
             }
 
             CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+
+            await _detalheDeCompraServico.VerificarStatus(id);
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeCompraFechada", model);
+
             model.DetalheDeCompra = detalheDeCompra;
 
             return PartialView("_ReceberProduto", model);
@@ -107,29 +117,17 @@ namespace MinhasVendas.App.Controllers
         public async Task<IActionResult> ReceberProduto(CarrinhoDeComprasViewModel carrinhoDeComprasViewModel)
         {
 
-
             var detalheDeCompra = await _context.DetalheDeCompras.FindAsync(carrinhoDeComprasViewModel.DetalheDeCompra.Id);
-                                        
-                                     
+                                                                             
             if (detalheDeCompra == null)
             {
                 return NotFound("Erro ao Receber o Produo.");
             }
 
-            detalheDeCompra.DataDeRecebimento = carrinhoDeComprasViewModel.DetalheDeCompra.DataDeRecebimento;
-            detalheDeCompra.RegistradoTransacaoDeEstoque = true;
-            _context.Update(detalheDeCompra);
-            await _context.SaveChangesAsync();
+           await _detalheDeCompraServico.RecberProduto(detalheDeCompra);
 
-            TransacaoDeEstoque transacaoDeEstoque = new TransacaoDeEstoque();
-            transacaoDeEstoque.ProdutoId = detalheDeCompra.ProdutoId;
-            transacaoDeEstoque.OrdemDeCompraId = detalheDeCompra.OrdemDeCompraId;
-            transacaoDeEstoque.TipoDransacaoDeEstoque = TipoDransacaoDeEstoque.Compra;
-            transacaoDeEstoque.DataDeTransacao = DateTime.Now;
-            transacaoDeEstoque.Quantidade = detalheDeCompra.Quantidade;
-            _context.Add(transacaoDeEstoque);
-            await _context.SaveChangesAsync();
-           
+           if (!OperacaoValida())  return PartialView("_OrdemDeCompraFechada", carrinhoDeComprasViewModel);
+
             return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
         }
 
@@ -140,9 +138,7 @@ namespace MinhasVendas.App.Controllers
             if (id == null || _context.DetalheDeVendas == null)
             {
                 return NotFound();
-            }
-
-            
+            }            
 
             var detalheDeCompra = await _context.DetalheDeCompras
                 .Include(v => v.Produto)
@@ -156,7 +152,10 @@ namespace MinhasVendas.App.Controllers
 
             CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
             model.DetalheDeCompra = detalheDeCompra;
+
             await _detalheDeCompraServico.VerificarStatus(id);
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeCompraFechada", model);                       
 
             return PartialView("_ExcluirProduto", model);
         }
@@ -183,20 +182,29 @@ namespace MinhasVendas.App.Controllers
         [HttpGet]
         public async Task<IActionResult> FinalizarVenda(int id)
         {
+            
             var ordemDeCompra = await _context.OrdemDeCompras
-                 .Include(v => v.DetalheDeCompras)
-                 .FirstOrDefaultAsync(v => v.Id == id);
+               .Include(v => v.DetalheDeCompras)
+               .FirstOrDefaultAsync(v => v.Id == id);            
 
             ViewData["OrdemDeCompraId"] = id;
-            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();           
 
             if (ordemDeCompra.DetalheDeCompras.Any())
             {
                 var custoProduto = from item in ordemDeCompra.DetalheDeCompras select (item.CustoUnitario * item.Quantidade);
                 decimal[] custoProdutos = custoProduto.ToArray();
-                decimal totalCompra= custoProdutos.Aggregate((a, b) => a + b);
+                decimal totalCompra = custoProdutos.Aggregate((a, b) => a + b);
                 model.TotalCompra = totalCompra;
             }
+
+            if (ordemDeCompra.DetalheDeCompras.Any(d => d.RegistradoTransacaoDeEstoque == false))
+            {
+                Notificar("Existe produto sem recebimento.");
+
+                return PartialView("_OrdemDeCompraAberta", model);
+            }
+            
             return PartialView("_FinalizarVenda", model);
         }
 
@@ -209,8 +217,9 @@ namespace MinhasVendas.App.Controllers
                 return NotFound("Erro ao finalizar a Venda.");
             }
 
-            ordemDeCompra.StatusOrdemDeCompra = StatusOrdemDeCompra.Aprovado;
+            ordemDeCompra.StatusOrdemDeCompra = StatusOrdemDeCompra.Fechado ;
             ordemDeCompra.FormaDePagamento = model.OrdemDeCompra.FormaDePagamento;
+            
 
             _context.Update(ordemDeCompra);
             await _context.SaveChangesAsync();

@@ -7,5 +7,6 @@ namespace MinhasVendas.App.Interfaces
         Task Adicionar(Produto produto);
         Task Atualizar(Produto produto);
         Task Remover(int id);
+        
     }
 }

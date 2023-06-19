@@ -3,7 +3,7 @@ using MinhasVendas.App.Interfaces;
 
 namespace MinhasVendas.App.Controllers
 {
-    public class BaseController : Controller
+    public abstract class BaseController : Controller
     {
         private readonly INotificador _notificador;
 
@@ -15,6 +15,10 @@ namespace MinhasVendas.App.Controllers
         protected bool OperacaoValida()
         {
             return !_notificador.TemNotificacao();
+        }
+        protected void Notificar(string mensagem)
+        {
+            _notificador.Handle(new Notificador.Notificacao(mensagem));
         }
     }
 }

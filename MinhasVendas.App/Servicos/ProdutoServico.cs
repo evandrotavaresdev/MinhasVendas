@@ -32,10 +32,16 @@ namespace MinhasVendas.App.Servicos
         {
             throw new NotImplementedException();
         }
-
+      
         public Task Remover(int id)
         {
             throw new NotImplementedException();
         }
+
+        
+
+
+
+
     }
 }

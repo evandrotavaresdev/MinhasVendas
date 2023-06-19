@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Build.Execution;
+using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Models.Enums;
+using MinhasVendas.App.ViewModels;
 
 namespace MinhasVendas.App.Servicos
 {
@@ -15,9 +17,18 @@ namespace MinhasVendas.App.Servicos
             _minhasVendasAppContext = minhasVendasAppContext;
         }
 
-        public Task Adicionar(DetalheDeCompra detalheDeCompra)
+        public async Task Adicionar(DetalheDeCompra detalheDeCompra)
         {
-            throw new NotImplementedException();
+            var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras.FindAsync(detalheDeCompra.OrdemDeCompraId);
+
+            if (ordemDeCompra.StatusOrdemDeCompra == StatusOrdemDeCompra.Fechado)
+            {
+                Notificar("Ordem de Compra está fechada.");
+                return;
+            }
+            _minhasVendasAppContext.Add(detalheDeCompra);
+            await _minhasVendasAppContext.SaveChangesAsync();
+
         }
 
         public Task Atualizar(DetalheDeCompra detalheDeCompra)
@@ -51,9 +62,57 @@ namespace MinhasVendas.App.Servicos
 
             if (detalheDeCompra.OrdemDeCompra.StatusOrdemDeCompra == StatusOrdemDeCompra.Fechado)
             {
-                Notificar("Ordem de Venda está fechada. Não é possível Excluir o produto.");
+                Notificar("Ordem de Venda está fechada.");
                 return;
             }
+        }
+
+        public async Task InserirProdutoStatus(int id)
+        {
+            var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras.FindAsync(id);
+
+            if(ordemDeCompra.StatusOrdemDeCompra == StatusOrdemDeCompra.Fechado)
+            {
+                Notificar("Ordem de Compra está fechada.");
+                return;
+            }
+
+           
+
+        }
+
+        public async Task RecberProduto(DetalheDeCompra detalheDeCompra)
+        {
+            var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras.FindAsync(detalheDeCompra.OrdemDeCompraId);                        
+
+            if (ordemDeCompra.StatusOrdemDeCompra == StatusOrdemDeCompra.Fechado)
+            {
+                Notificar("Ordem de Compra está fechada.");
+                return;
+            }
+          
+            var itemDetalheDeCompra = await _minhasVendasAppContext.DetalheDeCompras.FindAsync(detalheDeCompra.Id);
+
+            itemDetalheDeCompra.DataDeRecebimento = detalheDeCompra.DataDeRecebimento;
+            itemDetalheDeCompra.RegistradoTransacaoDeEstoque = true;
+            _minhasVendasAppContext.Update(itemDetalheDeCompra);
+            await _minhasVendasAppContext.SaveChangesAsync();
+
+            TransacaoDeEstoque transacaoDeEstoque = new TransacaoDeEstoque();
+            transacaoDeEstoque.ProdutoId = detalheDeCompra.ProdutoId;
+            transacaoDeEstoque.OrdemDeCompraId = detalheDeCompra.OrdemDeCompraId;
+            transacaoDeEstoque.TipoDransacaoDeEstoque = TipoDransacaoDeEstoque.Compra;
+            transacaoDeEstoque.DataDeTransacao = DateTime.Now;
+            transacaoDeEstoque.Quantidade = detalheDeCompra.Quantidade;
+            _minhasVendasAppContext.Add(transacaoDeEstoque);
+            await _minhasVendasAppContext.SaveChangesAsync();
+        }
+
+        public async Task FinalizarVenda(int id)
+        {
+           
+
+           
         }
     }
 }

@@ -8,5 +8,10 @@ namespace MinhasVendas.App.Interfaces
         Task Atualizar(DetalheDeCompra detalheDeCompra);
         Task Remover(int id);
         Task VerificarStatus (int id);
+        Task InserirProdutoStatus (int id);
+        Task RecberProduto(DetalheDeCompra detalheDeCompra);
+        Task FinalizarVenda(int id);    
+
+       
     }
 }
