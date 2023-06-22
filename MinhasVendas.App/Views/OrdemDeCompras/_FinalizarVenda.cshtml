@@ -9,7 +9,7 @@
     var custoProduto = from item in Model.OrdemDeCompra.DetalheDeCompras select (item.CustoUnitario * item.Quantidade);
     decimal[] custoProdutos = custoProduto.ToArray();
     decimal totalCompra = custoProdutos.Aggregate((a, b) => a + b);
-    Model.TotalCompra = totalCompra;
+    Model.TotalCompra = totalCompra + Model.OrdemDeCompra.ValorDeFrete;
 }
 
 
@@ -23,9 +23,9 @@
     <div class="modal-body">    
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>        
         <div class="form-group">
-            <label asp-for="@Model.DetalheDeCompra.OrdemDeCompraId class="control-label"></label>
-            <input readonly asp-for="@Model.DetalheDeCompra.OrdemDeCompraId" class="form-control" value=@ViewBag.OrdemDeCompraId>
-        </div>
+            <label asp-for="@Model.OrdemDeCompra.Id class="control-label"></label>
+            <input readonly asp-for="@Model.OrdemDeCompra.Id" class="form-control" value=@ViewBag.OrdemDeCompraId>
+        </div>        
         <div class="form-group">
             <label asp-for="@Model.TotalCompra" class="control-label"></label>
             <input readonly value="@Model.TotalCompra" class="form-control" />            

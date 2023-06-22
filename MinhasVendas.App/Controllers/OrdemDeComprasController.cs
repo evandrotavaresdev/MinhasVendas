@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Models;
+using MinhasVendas.App.Servicos;
 using MinhasVendas.App.ViewModels;
 
 namespace MinhasVendas.App.Controllers
@@ -62,6 +63,51 @@ namespace MinhasVendas.App.Controllers
 
 
             return View(model);
+        }
+
+
+        //
+        //
+        //
+
+        [HttpGet]
+        public async Task<IActionResult> FinalizarVenda(int id)
+        {
+            ViewData["OrdemDeCompraId"] = id;
+
+            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+
+            await _ordemDeCompraServico.FinalizarVendaStatus(id);
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
+
+            var ordemDeCompra =
+                await _context.OrdemDeCompras
+               .Include(v => v.DetalheDeCompras)
+               .FirstOrDefaultAsync(v => v.Id == id);
+
+
+            model.OrdemDeCompra = ordemDeCompra;
+
+            return PartialView("_FinalizarVenda", model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> FinalizarVenda(int id, CarrinhoDeComprasViewModel model)
+        {
+            if (id != model.OrdemDeCompra.Id) return NotFound();
+
+            var ordemDeCompra = await _context.OrdemDeCompras.FindAsync(model.OrdemDeCompra.Id);
+
+            if (ordemDeCompra == null) return NotFound();           
+
+            await _ordemDeCompraServico.FinalizarVenda(model.OrdemDeCompra);
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
+           
+            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
+
         }
 
         // GET: OrdemDeCompras
