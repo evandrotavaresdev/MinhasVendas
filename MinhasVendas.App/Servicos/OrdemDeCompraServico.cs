@@ -38,38 +38,8 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
         throw new NotImplementedException();
     }
 
-    public async Task FinalizarVendaStatus(int id)
-    {
-
-        var ordemDeCompra =
-            await _minhasVendasAppContext.OrdemDeCompras
-           .Include(v => v.DetalheDeCompras)
-           .FirstOrDefaultAsync(v => v.Id == id);
-
-        var temItensDeCompra = ordemDeCompra.DetalheDeCompras.Any();
-
-        var temRegistroDeEstoqueAberto = ordemDeCompra.DetalheDeCompras.Any(d => d.RegistradoTransacaoDeEstoque == false);
-
-        if (!temItensDeCompra)
-        {
-            Notificar("FINALIZAR COMPRA. Ordem de Compra vazia");
-            return;
-        }
-
-        if (temRegistroDeEstoqueAberto)
-        {
-            Notificar("FINALIZAR COMPRA. Existe produto sem recebimento.");
-            return;
-        }
-
-        if (ordemDeCompra.StatusOrdemDeCompra == StatusOrdemDeCompra.Fechado)
-        {
-            Notificar("FINALIZAR COMPRA. Ordem de Compra já está fechada.");
-            return;
-        }
-
-    }
-    public async Task FinalizarVenda(OrdemDeCompra ordemDeCompra)
+    
+    public async Task FinalizarCompra(OrdemDeCompra ordemDeCompra)
     {
 
         var itemOrdemDeCompra =
@@ -105,6 +75,38 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
 
         _minhasVendasAppContext.Update(itemOrdemDeCompra);
         await _minhasVendasAppContext.SaveChangesAsync();
+
+    }
+
+    public async Task FinalizarCompraView(int id)
+    {
+
+        var ordemDeCompra =
+            await _minhasVendasAppContext.OrdemDeCompras
+           .Include(v => v.DetalheDeCompras)
+           .FirstOrDefaultAsync(v => v.Id == id);
+
+        var temItensDeCompra = ordemDeCompra.DetalheDeCompras.Any();
+
+        var temRegistroDeEstoqueAberto = ordemDeCompra.DetalheDeCompras.Any(d => d.RegistradoTransacaoDeEstoque == false);
+
+        if (!temItensDeCompra)
+        {
+            Notificar("FINALIZAR COMPRA. Ordem de Compra vazia");
+            return;
+        }
+
+        if (temRegistroDeEstoqueAberto)
+        {
+            Notificar("FINALIZAR COMPRA. Existe produto sem recebimento.");
+            return;
+        }
+
+        if (ordemDeCompra.StatusOrdemDeCompra == StatusOrdemDeCompra.Fechado)
+        {
+            Notificar("FINALIZAR COMPRA. Ordem de Compra já está fechada.");
+            return;
+        }
 
     }
 }

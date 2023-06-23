@@ -71,13 +71,13 @@ namespace MinhasVendas.App.Controllers
         //
 
         [HttpGet]
-        public async Task<IActionResult> FinalizarVenda(int id)
+        public async Task<IActionResult> FinalizarCompra(int id)
         {
             ViewData["OrdemDeCompraId"] = id;
 
             CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
 
-            await _ordemDeCompraServico.FinalizarVendaStatus(id);
+            await _ordemDeCompraServico.FinalizarCompraView(id);
 
             if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
 
@@ -89,12 +89,12 @@ namespace MinhasVendas.App.Controllers
 
             model.OrdemDeCompra = ordemDeCompra;
 
-            return PartialView("_FinalizarVenda", model);
+            return PartialView("_FinalizarCompra", model);
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> FinalizarVenda(int id, CarrinhoDeComprasViewModel model)
+        public async Task<IActionResult> FinalizarCompra(int id, CarrinhoDeComprasViewModel model)
         {
             if (id != model.OrdemDeCompra.Id) return NotFound();
 
@@ -102,7 +102,7 @@ namespace MinhasVendas.App.Controllers
 
             if (ordemDeCompra == null) return NotFound();           
 
-            await _ordemDeCompraServico.FinalizarVenda(model.OrdemDeCompra);
+            await _ordemDeCompraServico.FinalizarCompra(model.OrdemDeCompra);
 
             if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
            

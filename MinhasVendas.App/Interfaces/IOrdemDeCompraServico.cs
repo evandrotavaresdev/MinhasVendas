@@ -7,7 +7,7 @@ namespace MinhasVendas.App.Interfaces
         Task Adicionar(OrdemDeCompra ordemDeCompra);
         Task Atualizar(OrdemDeCompra ordemDeCompra);
         Task Remover(int id);
-        Task FinalizarVendaStatus(int id);
-        Task FinalizarVenda(OrdemDeCompra ordemDeCompra);
+        Task FinalizarCompra(OrdemDeCompra ordemDeCompra);
+        Task FinalizarCompraView(int id);
     }
 }

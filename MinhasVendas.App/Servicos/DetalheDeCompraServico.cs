@@ -48,6 +48,11 @@ public class DetalheDeCompraServico : BaseServico, IDetalheDeCompraServico
             Notificar("Ordem de Venda está fechada. Não é possível Excluir o produto.");
             return;
         }
+        if (detalheDeCompra.RegistradoTransacaoDeEstoque)
+        {
+            Notificar("Produto já registrado no estoque. Não é possível excluir.");
+            return;
+        }
         _minhasVendasAppContext.DetalheDeCompras.Remove(detalheDeCompra);
         await _minhasVendasAppContext.SaveChangesAsync();
 
@@ -65,6 +70,12 @@ public class DetalheDeCompraServico : BaseServico, IDetalheDeCompraServico
             Notificar("Ordem de Venda está fechada.");
             return;
         }
+
+        if (detalheDeCompra.RegistradoTransacaoDeEstoque)
+        {
+            Notificar("Produto já registrado no estoque. Não é possível excluir.");
+            return;
+        }
     }
 
     public async Task InserirProdutoStatus(int id)
@@ -76,9 +87,6 @@ public class DetalheDeCompraServico : BaseServico, IDetalheDeCompraServico
             Notificar("Ordem de Compra está fechada.");
             return;
         }
-
-
-
     }
 
     public async Task RecberProduto(DetalheDeCompra detalheDeCompra)
@@ -107,76 +115,5 @@ public class DetalheDeCompraServico : BaseServico, IDetalheDeCompraServico
         _minhasVendasAppContext.Add(transacaoDeEstoque);
         await _minhasVendasAppContext.SaveChangesAsync();
     }
-
-    public async Task FinalizarVendaStatus(int id)
-    {
-
-        var ordemDeCompra =
-            await _minhasVendasAppContext.OrdemDeCompras
-           .Include(v => v.DetalheDeCompras)
-           .FirstOrDefaultAsync(v => v.Id == id);
-
-        var temItensDeCompra = ordemDeCompra.DetalheDeCompras.Any();
-
-        var temRegistroDeEstoqueAberto = ordemDeCompra.DetalheDeCompras.Any(d => d.RegistradoTransacaoDeEstoque == false);
-
-        if (!temItensDeCompra)
-        {
-            Notificar("FINALIZAR COMPRA. Ordem de Compra vazia");
-            return;
-        }
-
-        if (temRegistroDeEstoqueAberto)
-        {
-            Notificar("FINALIZAR COMPRA. Existe produto sem recebimento.");
-            return;
-        }
-
-        if (ordemDeCompra.StatusOrdemDeCompra == StatusOrdemDeCompra.Fechado)
-        {
-            Notificar("FINALIZAR COMPRA. Ordem de Compra já está fechada.");
-            return;
-        }
-        
-    }
-    public async Task FinalizarVenda(OrdemDeCompra ordemDeCompra)
-    {
-
-        var itemOrdemDeCompra =
-            await _minhasVendasAppContext.OrdemDeCompras
-           .Include(v => v.DetalheDeCompras)
-           .FirstOrDefaultAsync(v => v.Id == ordemDeCompra.Id);
-
-        var temItensDeCompra = itemOrdemDeCompra.DetalheDeCompras.Any();
-
-        var temRegistroDeEstoqueAberto = itemOrdemDeCompra.DetalheDeCompras.Any(d => d.RegistradoTransacaoDeEstoque == false);
-
-        if (!temItensDeCompra)
-        {
-            Notificar("FINALIZAR COMPRA. Ordem de Compra vazia");
-            return;
-        }
-
-        if (temRegistroDeEstoqueAberto)
-        {
-            Notificar("FINALIZAR COMPRA. Existe produto sem recebimento.");
-            return;
-        }
-
-        if (ordemDeCompra.StatusOrdemDeCompra == StatusOrdemDeCompra.Fechado)
-        {
-            Notificar("FINALIZAR COMPRA. Ordem de Compra já está fechada.");
-            return;
-        }
-
-        itemOrdemDeCompra.StatusOrdemDeCompra = StatusOrdemDeCompra.Fechado;
-        itemOrdemDeCompra.FormaDePagamento = ordemDeCompra.FormaDePagamento;
-
-
-        _minhasVendasAppContext.Update(ordemDeCompra);
-        await _minhasVendasAppContext.SaveChangesAsync();
-
-    }
-
 }    
 

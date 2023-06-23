@@ -178,48 +178,7 @@ namespace MinhasVendas.App.Controllers
             return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = detalheDeCompra.OrdemDeCompraId });
             
 
-        }
-        [HttpGet]
-        public async Task<IActionResult> FinalizarVenda(int id)
-        {
-            ViewData["OrdemDeCompraId"] = id;
-
-            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
-
-            await _detalheDeCompraServico.FinalizarVendaStatus(id);          
-
-           if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
-
-            var ordemDeCompra =
-                await _context.OrdemDeCompras
-               .Include(v => v.DetalheDeCompras)
-               .FirstOrDefaultAsync(v => v.Id == id);   
-
-          
-            model.OrdemDeCompra = ordemDeCompra;
-           
-            return PartialView("_FinalizarVenda", model);           
-        }
-
-
-        [HttpPost]
-        public async Task<IActionResult> FinalizarVenda(int id, CarrinhoDeComprasViewModel model)
-        {
-            var ordemDeCompra = await _context.OrdemDeCompras.FindAsync(model.DetalheDeCompra.OrdemDeCompraId);
-
-            if (ordemDeCompra == null)
-            {
-                return NotFound();
-            }
-
-            await _detalheDeCompraServico.FinalizarVenda(model.OrdemDeCompra);
-
-            if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
-
-            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
-
-        }
-
+        }       
 
         /* */
 

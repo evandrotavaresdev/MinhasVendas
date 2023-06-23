@@ -46,7 +46,7 @@
 
 <div>
     <div style="float:left">
-        <button class="btn btn-info" onclick="InserirProduto(@Model.OrdemDeCompra.Id)">Inserir Produto</button>
+        <button class="btn btn-info"  onclick="InserirProduto(@Model.OrdemDeCompra.Id)">Inserir Produto</button>
         <button class="btn btn-dark" onclick="FinalizarVenda(@Model.OrdemDeCompra.Id)">Finalizar Compra</button>
     </div>
 </div>
@@ -197,7 +197,7 @@
     var FinalizarVenda = function (vendaId) {
 
         var vendaId = vendaId;
-        var action = "/OrdemDeCompras/FinalizarVenda/";
+        var action = "/OrdemDeCompras/FinalizarCompra/";
         var url = action + vendaId;
 
         $("#finalizarVendaFormModelDiv").load(url, function () {
