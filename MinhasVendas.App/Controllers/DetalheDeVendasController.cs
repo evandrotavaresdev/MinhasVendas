@@ -6,23 +6,30 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
+using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Models.Enums;
 using MinhasVendas.App.ViewModels;
 
 namespace MinhasVendas.App.Controllers
 {
-    public class DetalheDeVendasController : Controller
+    public class DetalheDeVendasController : BaseController
     {
         private readonly MinhasVendasAppContext _context;
+        private readonly IDetalheDeVendaServico _detalheDeVendaServico;
 
-        public DetalheDeVendasController(MinhasVendasAppContext context)
+        public DetalheDeVendasController(MinhasVendasAppContext context,
+                                         IDetalheDeVendaServico detalheDeVendaServico,
+                                         INotificador notificador) : base(notificador)
         {
             _context = context;
+            _detalheDeVendaServico = detalheDeVendaServico;
         }
         [HttpGet]
         public async Task<IActionResult> InserirProduto(int id)
         {
+            
+
             var qtdCompraEVenda =
                        from produto in _context.TransacaoDeEstoques
                        group produto by produto.ProdutoId into produtoGroup
@@ -52,9 +59,13 @@ namespace MinhasVendas.App.Controllers
                                  });
            
             ViewData["ProdutoId"] = new SelectList(listaProdutos, "Id", "ProdutoCompleto");            
-            ViewData["OrdemDeVendaId"] = id;           
+            ViewData["OrdemDeVendaId"] = id;             
 
             CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
+
+            await _detalheDeVendaServico.AdicionarView(id);
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeVendaAberta", model);
 
             return PartialView("_InserirProduto", model);
         }
@@ -67,18 +78,6 @@ namespace MinhasVendas.App.Controllers
             {
                 var precoUnitario = await _context.Produtos.FirstOrDefaultAsync(p => p.Id == detalheDeVenda.ProdutoId);
                 detalheDeVenda.PrecoUnitario = precoUnitario.PrecoDeLista;
-
-                TransacaoDeEstoque transacaoDeEstoque = new TransacaoDeEstoque();
-                transacaoDeEstoque.ProdutoId = detalheDeVenda.ProdutoId;
-                transacaoDeEstoque.OrdemDeVendaId = detalheDeVenda.OrdemDeVendaId;
-                transacaoDeEstoque.TipoDransacaoDeEstoque = TipoDransacaoDeEstoque.Venda;
-                transacaoDeEstoque.DataDeTransacao = DateTime.Now;
-                transacaoDeEstoque.Quantidade = detalheDeVenda.Quantidade;
-               
-                _context.TransacaoDeEstoques.Add(transacaoDeEstoque);
-                await _context.SaveChangesAsync();
-
-                detalheDeVenda.TransacaoDeEstoqueId = transacaoDeEstoque.Id;
 
                 _context.Add(detalheDeVenda);
                 await _context.SaveChangesAsync();
@@ -96,12 +95,18 @@ namespace MinhasVendas.App.Controllers
         }
 
         // GET: VendasDetalhes/Delete/5
-        public async Task<IActionResult> ExcluirProduto(int? id)
+        public async Task<IActionResult> ExcluirProduto(int id)
         {
-            if (id == null || _context.DetalheDeVendas == null)
+            if (_context.DetalheDeVendas == null)
             {
                 return NotFound();
             }
+
+            await _detalheDeVendaServico.Remover(id, true);
+
+            CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeVendaAberta", model);
 
             var detalheDeVenda = await _context.DetalheDeVendas
                 .Include(v => v.Produto)
@@ -112,8 +117,7 @@ namespace MinhasVendas.App.Controllers
             {
                 return NotFound();
             }
-
-            CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
+            
             model.DetalheDeVenda = detalheDeVenda;
 
             return PartialView("_ExcluirProduto", model);
@@ -128,15 +132,15 @@ namespace MinhasVendas.App.Controllers
             {
                 return Problem("Entity set 'AuroraCollabContext.VendaDetalhe'  is null.");
             }
-            var detalheDeVenda = await _context.DetalheDeVendas.FindAsync(id);
-            if (detalheDeVenda != null)
-            {
-                _context.DetalheDeVendas.Remove(detalheDeVenda);
+            
+            var detalheDevenda = await _context.DetalheDeVendas.Include(o => o.OrdemDeVenda).FirstOrDefaultAsync(d => d.Id == id);
+            
+            await _detalheDeVendaServico.Remover(id, false);
 
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction("CarrinhoDeVendas", "OrdemDeVendas", new { id = detalheDeVenda.OrdemDeVendaId });
+            if (!OperacaoValida()) return PartialView("_OrdemDeVendasAberta");
+            
+            
+            return RedirectToAction("CarrinhoDeVendas", "OrdemDeVendas", new { detalheDevenda.OrdemDeVenda.Id  });
         }
 
         public async Task<IActionResult> FinalizarVenda(int id)
@@ -167,6 +171,25 @@ namespace MinhasVendas.App.Controllers
             {
                 return NotFound("Erro ao finalizar a Venda.");
             }
+
+            //var produtos = await _context   // Verificar as opções pois talves precisa pesquisar no banco e partir dai realizar o update.
+
+            //foreach (var item in model.DetalheDeVenda)
+            //{
+
+            //}
+
+            //TransacaoDeEstoque transacaoDeEstoque = new TransacaoDeEstoque();
+            //transacaoDeEstoque.ProdutoId = detalheDeVenda.ProdutoId;
+            //transacaoDeEstoque.OrdemDeVendaId = detalheDeVenda.OrdemDeVendaId;
+            //transacaoDeEstoque.TipoDransacaoDeEstoque = TipoDransacaoDeEstoque.Venda;
+            //transacaoDeEstoque.DataDeTransacao = DateTime.Now;
+            //transacaoDeEstoque.Quantidade = detalheDeVenda.Quantidade;
+
+            //_context.TransacaoDeEstoques.Add(transacaoDeEstoque);
+            //await _context.SaveChangesAsync();
+
+            //detalheDeVenda.TransacaoDeEstoqueId = transacaoDeEstoque.Id;
 
             ordemDeVenda.StatusOrdemDeVenda = StatusOrdemDeVenda.Vendido;
             ordemDeVenda.FormaDePagamento = model.OrdemDeVenda.FormaDePagamento;

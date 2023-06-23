@@ -17,6 +17,8 @@ builder.Services.AddScoped<INotificador, Notificador>();
 builder.Services.AddScoped<IProdutoServico, ProdutoServico>();
 builder.Services.AddScoped<IDetalheDeCompraServico, DetalheDeCompraServico>();
 builder.Services.AddScoped<IOrdemDeCompraServico, OrdemDeCompraServico>();
+builder.Services.AddScoped<IOrdemDeVendaServico, OrdemDeVendaServico>();
+builder.Services.AddScoped<IDetalheDeVendaServico, DetalheDeVendaServico>();
 
 var app = builder.Build();
 

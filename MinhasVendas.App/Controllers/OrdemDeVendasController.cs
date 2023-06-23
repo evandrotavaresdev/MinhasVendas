@@ -6,18 +6,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
+using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Models;
+using MinhasVendas.App.Models.Enums;
 using MinhasVendas.App.ViewModels;
 
 namespace MinhasVendas.App.Controllers
 {
-    public class OrdemDeVendasController : Controller
+    public class OrdemDeVendasController : BaseController
     {
         private readonly MinhasVendasAppContext _context;
+        private readonly IOrdemDeVendaServico _ordemDeVendaServico;
 
-        public OrdemDeVendasController(MinhasVendasAppContext context)
+        public OrdemDeVendasController(MinhasVendasAppContext context,
+                                       IOrdemDeVendaServico ordemDeVendaServico,
+                                       INotificador notificador) : base(notificador)
         {
             _context = context;
+            _ordemDeVendaServico = ordemDeVendaServico;
         }
 
         public async Task<IActionResult> CarrinhoDeVendas(int? id)
@@ -106,11 +112,14 @@ namespace MinhasVendas.App.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(ordemDeVenda);
+                ordemDeVenda.StatusOrdemDeVenda = StatusOrdemDeVenda.Orcamento;
+                ordemDeVenda.DataDeVenda = DateTime.Now;
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("CarrinhoDeVendas", new { id = ordemDeVenda.Id });
             }
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Nome", ordemDeVenda.ClienteId);
             return View(ordemDeVenda);
+            
         }
 
         // GET: OrdemDeVendas/Edit/5

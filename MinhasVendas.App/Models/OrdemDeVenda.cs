@@ -10,8 +10,8 @@ namespace MinhasVendas.App.Models
        
         public StatusOrdemDeVenda StatusOrdemDeVenda { get; set; }
         public FormaDePagamento FormaDePagamento { get; set; }
-        public DateTime DataDePagamento { get; set; }
-        public DateTime DataDeVenda { get; set; }
+        public DateTime? DataDePagamento { get; set; }
+        public DateTime DataDeVenda { get; set; } // Substituir por DataDeCriacao
        
         /* Ef Relacionamento */
         public ICollection<DetalheDeVenda>? DetalheDeVendas { get; set; }

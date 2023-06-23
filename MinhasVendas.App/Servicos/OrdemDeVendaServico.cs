@@ -1,6 +1,8 @@
-﻿namespace MinhasVendas.App.Servicos
+﻿using MinhasVendas.App.Interfaces;
+
+namespace MinhasVendas.App.Servicos
 {
-    public class OrdemDeVendaServico
+    public class OrdemDeVendaServico : IOrdemDeVendaServico
     {
     }
 }
