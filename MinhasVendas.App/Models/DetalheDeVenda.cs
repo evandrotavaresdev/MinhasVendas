@@ -13,6 +13,7 @@ namespace MinhasVendas.App.Models
         public decimal PrecoUnitario { get; set; }
         [Range(0, 20, ErrorMessage = "Valor Inválido")]
         public decimal Desconto { get; set; }
+        public bool RegistroTransacaoDeEstoque { get; set; }
         public int TransacaoDeEstoqueId { get; set; }
 
         /* Ef Relacionamento*/

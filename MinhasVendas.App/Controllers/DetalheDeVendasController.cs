@@ -166,34 +166,36 @@ namespace MinhasVendas.App.Controllers
         [HttpPost]
         public async Task<IActionResult> FinalizarVenda(CarrinhoDeVendasViewModel model)
         {
-            var ordemDeVenda = await _context.OrdemDeVendas.FindAsync(model.DetalheDeVenda.OrdemDeVendaId);
+            var ordemDeVenda = await _context.OrdemDeVendas.Include(d=> d.DetalheDeVendas).FirstOrDefaultAsync(o=> o.Id == model.DetalheDeVenda.OrdemDeVendaId);
             if (ordemDeVenda == null)
             {
                 return NotFound("Erro ao finalizar a Venda.");
             }
+            
 
-            //var produtos = await _context   // Verificar as opções pois talves precisa pesquisar no banco e partir dai realizar o update.
+            foreach (var item in ordemDeVenda.DetalheDeVendas)
+            {
+                TransacaoDeEstoque transacaoDeEstoque = new TransacaoDeEstoque();
+                
+                transacaoDeEstoque.ProdutoId = item.ProdutoId;
+                transacaoDeEstoque.OrdemDeVendaId = item.OrdemDeVendaId;
+                transacaoDeEstoque.TipoDransacaoDeEstoque = TipoDransacaoDeEstoque.Venda;
+                transacaoDeEstoque.DataDeTransacao = DateTime.Now;
+                transacaoDeEstoque.Quantidade = item.Quantidade;
 
-            //foreach (var item in model.DetalheDeVenda)
-            //{
+                _context.TransacaoDeEstoques.Add(transacaoDeEstoque);
+                await _context.SaveChangesAsync();
 
-            //}
-
-            //TransacaoDeEstoque transacaoDeEstoque = new TransacaoDeEstoque();
-            //transacaoDeEstoque.ProdutoId = detalheDeVenda.ProdutoId;
-            //transacaoDeEstoque.OrdemDeVendaId = detalheDeVenda.OrdemDeVendaId;
-            //transacaoDeEstoque.TipoDransacaoDeEstoque = TipoDransacaoDeEstoque.Venda;
-            //transacaoDeEstoque.DataDeTransacao = DateTime.Now;
-            //transacaoDeEstoque.Quantidade = detalheDeVenda.Quantidade;
-
-            //_context.TransacaoDeEstoques.Add(transacaoDeEstoque);
-            //await _context.SaveChangesAsync();
-
-            //detalheDeVenda.TransacaoDeEstoqueId = transacaoDeEstoque.Id;
-
+                
+                item.TransacaoDeEstoqueId = transacaoDeEstoque.Id;
+                item.RegistroTransacaoDeEstoque = true;
+                _context.DetalheDeVendas.Update(item);
+                await _context.SaveChangesAsync();
+               
+            }
             ordemDeVenda.StatusOrdemDeVenda = StatusOrdemDeVenda.Vendido;
             ordemDeVenda.FormaDePagamento = model.OrdemDeVenda.FormaDePagamento;
-           
+
             _context.Update(ordemDeVenda);
             await _context.SaveChangesAsync();
 
