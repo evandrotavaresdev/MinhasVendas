@@ -62,10 +62,48 @@ namespace MinhasVendas.App.Controllers
                 model.TotalItens = totalItens;
             }
 
-          
+            
             return View(model);
         }
+        public async Task<IActionResult> CarrinhoDeVendasPartial(int? id)
+        {
+            if (id == null || _context.OrdemDeVendas == null)
+            {
+                return NotFound();
+            }
 
+            var ordemDeVenda = await _context.OrdemDeVendas
+                 .Include(v => v.Cliente)
+                 .Include(v => v.DetalheDeVendas).ThenInclude(v => v.Produto)
+                 .FirstOrDefaultAsync(m => m.Id == id);
+
+
+            if (ordemDeVenda == null)
+            {
+                return NotFound();
+            }
+
+
+            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "NomeProduto");
+
+            var model = new CarrinhoDeVendasViewModel();
+            model.OrdemDeVenda = ordemDeVenda;
+
+            if (ordemDeVenda.DetalheDeVendas.Any())
+            {
+                var precoProduto = from item in model.OrdemDeVenda.DetalheDeVendas select (item.PrecoUnitario * item.Quantidade * (1 - item.Desconto / 100));
+                decimal[] precoProdutos = precoProduto.ToArray();
+                decimal totalVenda = precoProdutos.Aggregate((a, b) => a + b);
+                model.TotalVenda = totalVenda;
+
+                var itens = from item in model.OrdemDeVenda.DetalheDeVendas select (item.Quantidade);
+                int totalItens = itens.Sum();
+                model.TotalItens = totalItens;
+            }
+
+            return PartialView("CarrinhoDeVendas", model);
+           
+        }
 
         /* */
 

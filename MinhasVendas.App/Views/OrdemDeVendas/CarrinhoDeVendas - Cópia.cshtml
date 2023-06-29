@@ -4,8 +4,10 @@
     ViewData["Title"] = "Carrinho de Vendas";
 }
 
+<h1>Carrinho de Venda</h1>
+
 <div id="carrinhodevendaid">
-    <h1>Carrinho de Venda</h1>
+
     <div>
         <h4>Vendas</h4>
         <hr />
@@ -157,26 +159,33 @@
                 $("#inserirProdutoFormModalConteudoDiv").load(url, function () {
                     $("#inserirProdutoFormModalId").modal("show");
 
-                    var form = document.getElementById("inserirProdutoFormId");
-                    $.validator.unobtrusive.parse(form);
+                    //  var form = document.getElementById("inserirProdutoFormId");
+                    //  $.validator.unobtrusive.parse(inserirProdutoFormId);
                 });
 
                 $("#inserirProdutoFormModalConteudoDiv").on("submit", function (event) {
+
 
                     $.ajax({
                         url: "/DetalheDeVendas/InserirProduto/",
                         type: "Post",
                         data: $("#inserirProdutoFormId").serialize(),
-                        success: function (resultado) {
-                            if (resultado.sucesso) {
+                        success: function (result) {
+                            console.log(result)
+                            if (true) {
                                 $('#inserirProdutoFormModalId').modal('hide');
-                                $('#carrinhodevendaid').load(resultado.url);
+                                $('#carrinhodevendaid').html(result)
+
                             } else {
-                                $('#inserirProdutoFormModalConteudoDiv').html(resultado);
+                                $('#inserirProdutoFormModalConteudoDiv').html(result);
+                                //bindForm(dialog);
                             }
                         }
                     });
                     return false;
+
+
+                    //event.preventDefault();
                 });
 
             }

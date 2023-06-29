@@ -1,7 +1,7 @@
 ﻿@model MinhasVendas.App.ViewModels.CarrinhoDeVendasViewModel
 
 @{
-    ViewData["Title"] = "Inserir Produto";
+    ViewData["Title"] = "Inserir Produto Cópia";
 }
 
     <div class="modal-header">
@@ -9,10 +9,10 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>     
     </div>
 
-<form asp-action="InserirProduto" id="inserirProdutoFormId">
+<form asp-action="InserirProduto" id="inserirProdutoForm">
     
     <div class="modal-body">    
-       <vc:resumo></vc:resumo>   
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>        
         <div class="form-group">
             <label asp-for="@Model.DetalheDeVenda.OrdemDeVendaId class="control-label"></label>
             <input readonly asp-for="@Model.DetalheDeVenda.OrdemDeVendaId" class="form-control" value=@ViewBag.OrdemDeVendaId>

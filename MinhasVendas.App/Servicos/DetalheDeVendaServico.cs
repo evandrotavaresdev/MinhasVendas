@@ -16,9 +16,16 @@ public class DetalheDeVendaServico : BaseServico, IDetalheDeVendaServico
         _minhasVendasAppContext = minhasVendasAppContext;
         
     }
-    public Task Adicionar(DetalheDeVenda detalheDeVenda)
+    public async Task Adicionar(DetalheDeVenda detalheDeVenda)
     {
-        throw new NotImplementedException();
+        //Notificar("ADICIONAR ITEM DE VENDA - Operação inválida, arbitrária.");
+        //return;
+
+        var precoUnitario = await _minhasVendasAppContext.Produtos.FirstOrDefaultAsync(p => p.Id == detalheDeVenda.ProdutoId);
+        detalheDeVenda.PrecoUnitario = precoUnitario.PrecoDeLista;
+
+        _minhasVendasAppContext.Add(detalheDeVenda);
+        await _minhasVendasAppContext.SaveChangesAsync();
     }
 
     public async Task AdicionarView(int id)

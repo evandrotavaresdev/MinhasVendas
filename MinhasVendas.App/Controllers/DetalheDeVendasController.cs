@@ -17,48 +17,24 @@ namespace MinhasVendas.App.Controllers
     {
         private readonly MinhasVendasAppContext _context;
         private readonly IDetalheDeVendaServico _detalheDeVendaServico;
+        private readonly ITransacaoDeEstoqueServico _transacaoDeEstoqueServico;
 
         public DetalheDeVendasController(MinhasVendasAppContext context,
                                          IDetalheDeVendaServico detalheDeVendaServico,
+                                         ITransacaoDeEstoqueServico transacaoDeEstoqueServico,
                                          INotificador notificador) : base(notificador)
         {
             _context = context;
             _detalheDeVendaServico = detalheDeVendaServico;
+            _transacaoDeEstoqueServico = transacaoDeEstoqueServico;
         }
         [HttpGet]
         public async Task<IActionResult> InserirProduto(int id)
         {
-            
-
-            var qtdCompraEVenda =
-                       from produto in _context.TransacaoDeEstoques
-                       group produto by produto.ProdutoId into produtoGroup
-                       select new
-                       {
-                           produtoGroup.Key,
-                           totalProdutoComprado = produtoGroup.Where(p => p.TipoDransacaoDeEstoque == TipoDransacaoDeEstoque.Compra).Sum(p => p.Quantidade),
-                           totalProdutoVendido = produtoGroup.Where(p => p.TipoDransacaoDeEstoque == TipoDransacaoDeEstoque.Venda).Sum(p => p.Quantidade)
-                       };
-
-            var produtos = await _context.Produtos.ToListAsync();
-
-            foreach (var produto in qtdCompraEVenda)
-            {
-                var item = produtos.Find(p => p.Id == produto.Key);
-                item.EstoqueAtual = produto.totalProdutoComprado - produto.totalProdutoVendido;
-            }
-
-            var listaProdutos = (from c in produtos
-                                 select new
-                                 {
-                                     Id = c.Id,
-                                     NomeProtudo = c.Nome,
-                                     Preco = c.PrecoDeLista,
-                                     EstoqueAtual = c.EstoqueAtual,
-                                     ProdutoCompleto = c.Nome + " | " + "Valor: R$ " + " " + c.PrecoDeLista + " | " + c.EstoqueAtual
-                                 });
            
-            ViewData["ProdutoId"] = new SelectList(listaProdutos, "Id", "ProdutoCompleto");            
+            var listaDeProdutos = await _transacaoDeEstoqueServico.ConsultaSaldoDeEstoque();
+
+            ViewData["ProdutoId"] = new SelectList(listaDeProdutos, "Id", "ProdutoCompleto");            
             ViewData["OrdemDeVendaId"] = id;             
 
             CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
@@ -72,26 +48,25 @@ namespace MinhasVendas.App.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> InserirProduto([Bind("Id,OrdemDeVendaId,ProdutoId,Quantidade,PrecoUnitario,Desconto")] DetalheDeVenda detalheDeVenda)
+        public async Task<IActionResult> InserirProduto([Bind("Id,OrdemDeVendaId,ProdutoId,Quantidade,PrecoUnitario,Desconto")] DetalheDeVenda detalheDeVenda)  //
         {
-            if (ModelState.IsValid)
-            {
-                var precoUnitario = await _context.Produtos.FirstOrDefaultAsync(p => p.Id == detalheDeVenda.ProdutoId);
-                detalheDeVenda.PrecoUnitario = precoUnitario.PrecoDeLista;
+            var listaDeProdutos = await _transacaoDeEstoqueServico.ConsultaSaldoDeEstoque();
 
-                _context.Add(detalheDeVenda);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("CarrinhoDeVendas", "OrdemDeVendas", new { id = detalheDeVenda.OrdemDeVendaId });
-            }
-
-            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "Id", detalheDeVenda.ProdutoId);
-            ViewData["TransacaoDeEstoqueId"] = new SelectList(_context.TransacaoDeEstoques, "Id", "Id", detalheDeVenda.TransacaoDeEstoqueId);            
-            ViewData["OrdemDeVendaId"] = new SelectList(_context.OrdemDeVendas, "Id", "Id", detalheDeVenda.OrdemDeVendaId);
+            ViewData["ProdutoId"] = new SelectList(listaDeProdutos, "Id", "ProdutoCompleto");
+            ViewData["OrdemDeVendaId"] = detalheDeVenda.OrdemDeVendaId;
 
             CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
             model.DetalheDeVenda = detalheDeVenda;
 
-            return View(model);
+            if (!ModelState.IsValid) return PartialView("_InserirProduto", model);
+                          
+            await _detalheDeVendaServico.Adicionar(detalheDeVenda);
+
+            if (!OperacaoValida()) return PartialView("_InserirProduto", model);                                    
+
+            var url = Url.Action("CarrinhoDeVendasPartial", "OrdemDeVendas",new { id = detalheDeVenda.OrdemDeVendaId });
+            return Json(new { sucesso = true, url });
+               
         }
 
         // GET: VendasDetalhes/Delete/5
