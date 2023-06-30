@@ -17,10 +17,7 @@ public class DetalheDeVendaServico : BaseServico, IDetalheDeVendaServico
         
     }
     public async Task Adicionar(DetalheDeVenda detalheDeVenda)
-    {
-        //Notificar("ADICIONAR ITEM DE VENDA - Operação inválida, arbitrária.");
-        //return;
-
+    {        
         var precoUnitario = await _minhasVendasAppContext.Produtos.FirstOrDefaultAsync(p => p.Id == detalheDeVenda.ProdutoId);
         detalheDeVenda.PrecoUnitario = precoUnitario.PrecoDeLista;
 

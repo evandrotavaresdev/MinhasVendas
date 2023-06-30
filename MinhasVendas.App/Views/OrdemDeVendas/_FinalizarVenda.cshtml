@@ -20,11 +20,11 @@
 <form asp-action="FinalizarVenda" id="finalizarVendaForm">
     
     <div class="modal-body">    
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>        
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>       
         <div class="form-group">
-            <label asp-for="@Model.DetalheDeVenda.OrdemDeVendaId class="control-label"></label>
-            <input readonly asp-for="@Model.DetalheDeVenda.OrdemDeVendaId" class="form-control" value=@ViewBag.OrdemDeVendaId>
-        </div>
+            <label asp-for="@Model.OrdemDeVenda.Id class="control-label"></label>
+            <input readonly asp-for="@Model.OrdemDeVenda.Id" class="form-control" value=@ViewBag.OrdemDeVendaId>
+        </div>       
         <div class="form-group">
             <label asp-for="@Model.TotalVenda" class="control-label"></label>
             <input readonly value="@Model.TotalVenda" class="form-control" />            

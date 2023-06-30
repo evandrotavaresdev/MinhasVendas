@@ -26,83 +26,64 @@ namespace MinhasVendas.App.Controllers
             _ordemDeVendaServico = ordemDeVendaServico;
         }
 
-        public async Task<IActionResult> CarrinhoDeVendas(int? id)
+        public async Task<IActionResult> CarrinhoDeVendas(int id)
         {
-            if (id == null || _context.OrdemDeVendas == null)
-            {
-                return NotFound();
-            }
+            var ordemDeVenda = await _ordemDeVendaServico.ConsultaOrdemDeVendaDetalhesDeVendaClienteProduto(id);
 
-            var ordemDeVenda = await _context.OrdemDeVendas
-                 .Include(v => v.Cliente)
-                 .Include(v => v.DetalheDeVendas).ThenInclude(v => v.Produto)
-                 .FirstOrDefaultAsync(m => m.Id == id);
-
-
-            if (ordemDeVenda == null)
-            {
-                return NotFound();
-            }
-
-
-            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "NomeProduto");
-
+            if (ordemDeVenda == null) return NotFound("Carrinho de Compra não Existe.");
+                       
             var model = new CarrinhoDeVendasViewModel();
-            model.OrdemDeVenda = ordemDeVenda;
-
-            if (ordemDeVenda.DetalheDeVendas.Any())
-            {
-                var precoProduto = from item in model.OrdemDeVenda.DetalheDeVendas select (item.PrecoUnitario * item.Quantidade * (1 - item.Desconto / 100));
-                decimal[] precoProdutos = precoProduto.ToArray();
-                decimal totalVenda = precoProdutos.Aggregate((a, b) => a + b);
-                model.TotalVenda = totalVenda;
-
-                var itens = from item in model.OrdemDeVenda.DetalheDeVendas select (item.Quantidade);
-                int totalItens = itens.Sum();
-                model.TotalItens = totalItens;
-            }
-
+            
+            model.OrdemDeVenda = ordemDeVenda;      
             
             return View(model);
         }
-        public async Task<IActionResult> CarrinhoDeVendasPartial(int? id)
+        public async Task<IActionResult> CarrinhoDeVendasPartial(int id)
         {
-            if (id == null || _context.OrdemDeVendas == null)
-            {
-                return NotFound();
-            }
+            var ordemDeVenda = await _ordemDeVendaServico.ConsultaOrdemDeVendaDetalhesDeVendaClienteProduto(id);
 
-            var ordemDeVenda = await _context.OrdemDeVendas
-                 .Include(v => v.Cliente)
-                 .Include(v => v.DetalheDeVendas).ThenInclude(v => v.Produto)
-                 .FirstOrDefaultAsync(m => m.Id == id);
-
-
-            if (ordemDeVenda == null)
-            {
-                return NotFound();
-            }
-
-
-            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "NomeProduto");
+            if (ordemDeVenda == null) return NotFound("Carrinho de Compra não EXISTE.");
 
             var model = new CarrinhoDeVendasViewModel();
+            
             model.OrdemDeVenda = ordemDeVenda;
-
-            if (ordemDeVenda.DetalheDeVendas.Any())
-            {
-                var precoProduto = from item in model.OrdemDeVenda.DetalheDeVendas select (item.PrecoUnitario * item.Quantidade * (1 - item.Desconto / 100));
-                decimal[] precoProdutos = precoProduto.ToArray();
-                decimal totalVenda = precoProdutos.Aggregate((a, b) => a + b);
-                model.TotalVenda = totalVenda;
-
-                var itens = from item in model.OrdemDeVenda.DetalheDeVendas select (item.Quantidade);
-                int totalItens = itens.Sum();
-                model.TotalItens = totalItens;
-            }
-
+        
             return PartialView("CarrinhoDeVendas", model);
            
+        }
+
+        public async Task<IActionResult> FinalizarVenda(int id)
+        {           
+            await _ordemDeVendaServico.FinalizarVendaView(id);                       
+
+            ViewData["OrdemDeVendaId"] = id;           
+            
+            CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeVendaAberta", model);
+
+            var ordemDeVenda = await _ordemDeVendaServico.ConsultaOrdemDeVendaDetalheDeVenda(id);
+
+            model.OrdemDeVenda = ordemDeVenda;
+
+            return PartialView("_FinalizarVenda", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> FinalizarVenda(int id,CarrinhoDeVendasViewModel model)
+        {
+            if (id != model.OrdemDeVenda.Id) return NotFound();
+
+            var ordemDeVenda = await _ordemDeVendaServico.ConsultaOrdemDeVenda(model.OrdemDeVenda.Id);
+
+            if (ordemDeVenda is null) return NotFound();
+            
+            await _ordemDeVendaServico.FinalizarVenda(model.OrdemDeVenda);
+
+            if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
+            
+            return RedirectToAction("CarrinhoDeVendas", "OrdemDeVendas", new { id = ordemDeVenda.Id });
+
         }
 
         /* */
