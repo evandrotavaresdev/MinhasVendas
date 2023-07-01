@@ -11,98 +11,97 @@ using MinhasVendas.App.Models;
 using MinhasVendas.App.Servicos;
 using MinhasVendas.App.ViewModels;
 
-namespace MinhasVendas.App.Controllers
-{
-    public class OrdemDeComprasController : BaseController
-    {       
-        private readonly IOrdemDeCompraServico _ordemDeCompraServico;
-        private readonly IFornecedorServico _fornecedorServico;
+namespace MinhasVendas.App.Controllers;
 
-        public OrdemDeComprasController(IOrdemDeCompraServico ordemDeCompraServico,
-                                        IFornecedorServico fornecedorServico,
-                                        INotificador notificador) : base(notificador)
-        {
-            _ordemDeCompraServico = ordemDeCompraServico;
-            _fornecedorServico = fornecedorServico;
-        }
+public class OrdemDeComprasController : BaseController
+{       
+    private readonly IOrdemDeCompraServico _ordemDeCompraServico;
+    private readonly IFornecedorServico _fornecedorServico;
 
-        public async Task<IActionResult> Index()
-        {
-            var OrdemDeCompraFornecedor = await _ordemDeCompraServico.ConsultaOrdemDeCompraFornecedor();
-            return View(OrdemDeCompraFornecedor);
-        }
+    public OrdemDeComprasController(IOrdemDeCompraServico ordemDeCompraServico,
+                                    IFornecedorServico fornecedorServico,
+                                    INotificador notificador) : base(notificador)
+    {
+        _ordemDeCompraServico = ordemDeCompraServico;
+        _fornecedorServico = fornecedorServico;
+    }
 
-        public async Task<IActionResult> Create()
-        {
-            ViewData["FornecedorId"] = new SelectList(await _fornecedorServico.ConsultaFornecedor(), "Id", "Nome");
+    public async Task<IActionResult> Index()
+    {
+        var OrdemDeCompraFornecedor = await _ordemDeCompraServico.ConsultaOrdemDeCompraFornecedor();
+        return View(OrdemDeCompraFornecedor);
+    }
 
-            return View();
-        }
+    public async Task<IActionResult> Create()
+    {
+        ViewData["FornecedorId"] = new SelectList(await _fornecedorServico.ConsultaFornecedor(), "Id", "Nome");
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FornecedorId,DataDeCriacao,StatusOrdemDeCompra,ValorDeFrete")] OrdemDeCompra ordemDeCompra)
-        {
-            ViewData["FornecedorId"] = new SelectList(await _fornecedorServico.ConsultaFornecedor(), "Id", "Id", ordemDeCompra.FornecedorId);
+        return View();
+    }
 
-            if (!ModelState.IsValid) return View(ordemDeCompra);
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("Id,FornecedorId,DataDeCriacao,StatusOrdemDeCompra,ValorDeFrete")] OrdemDeCompra ordemDeCompra)
+    {
+        ViewData["FornecedorId"] = new SelectList(await _fornecedorServico.ConsultaFornecedor(), "Id", "Id", ordemDeCompra.FornecedorId);
 
-            await _ordemDeCompraServico.Adicionar(ordemDeCompra);
+        if (!ModelState.IsValid) return View(ordemDeCompra);
 
-            if (!OperacaoValida()) return View(ordemDeCompra);
+        await _ordemDeCompraServico.Adicionar(ordemDeCompra);
 
-            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
+        if (!OperacaoValida()) return View(ordemDeCompra);
 
-        }
-        public async Task<IActionResult> CarrinhoDeCompras(int id)
-        {
-            var ordemDeCompra = await _ordemDeCompraServico.ConsultaOrdemDeCompraDetalheDeCompraProdutoFornecedor(id);
+        return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
 
-            if (ordemDeCompra is null) NotFound("Ordem de Compra não Existe.");
+    }
+    public async Task<IActionResult> CarrinhoDeCompras(int id)
+    {
+        var ordemDeCompra = await _ordemDeCompraServico.ConsultaOrdemDeCompraDetalheDeCompraProdutoFornecedor(id);
 
-            var model = new CarrinhoDeComprasViewModel();
+        if (ordemDeCompra is null) NotFound("Ordem de Compra não Existe.");
 
-            model.OrdemDeCompra = ordemDeCompra;
+        var model = new CarrinhoDeComprasViewModel();
 
-            return View(model);
-        }
+        model.OrdemDeCompra = ordemDeCompra;
 
-        [HttpGet]
-        public async Task<IActionResult> FinalizarCompra(int id)
-        {
-            ViewData["OrdemDeCompraId"] = id;
+        return View(model);
+    }
 
-            CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
+    [HttpGet]
+    public async Task<IActionResult> FinalizarCompra(int id)
+    {
+        ViewData["OrdemDeCompraId"] = id;
 
-            await _ordemDeCompraServico.FinalizarCompraView(id);
+        CarrinhoDeComprasViewModel model = new CarrinhoDeComprasViewModel();
 
-            if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
+        await _ordemDeCompraServico.FinalizarCompraView(id);
 
-            var ordemDeCompra = await _ordemDeCompraServico.ConsultaOrdemDeCompraDetalheDeCompra(id);
+        if (!OperacaoValida()) return PartialView("_OrdemDeCompraStatus", model);
 
-            model.OrdemDeCompra = ordemDeCompra;
+        var ordemDeCompra = await _ordemDeCompraServico.ConsultaOrdemDeCompraDetalheDeCompra(id);
 
-            return PartialView("_FinalizarCompra", model);
-        }
+        model.OrdemDeCompra = ordemDeCompra;
+
+        return PartialView("_FinalizarCompra", model);
+    }
 
 
-        [HttpPost]
-        public async Task<IActionResult> FinalizarCompra(int id, CarrinhoDeComprasViewModel model)
-        {
-            if (id != model.OrdemDeCompra.Id) return NotFound();
+    [HttpPost]
+    public async Task<IActionResult> FinalizarCompra(int id, CarrinhoDeComprasViewModel model)
+    {
+        if (id != model.OrdemDeCompra.Id) return NotFound();
 
-            var ordemDeCompra = await _ordemDeCompraServico.ConsultaOrdemDeCompra(model.OrdemDeCompra.Id);
+        var ordemDeCompra = await _ordemDeCompraServico.ConsultaOrdemDeCompra(model.OrdemDeCompra.Id);
 
-            if (ordemDeCompra == null) return NotFound();
+        if (ordemDeCompra == null) return NotFound();
 
-            await _ordemDeCompraServico.FinalizarCompra(model.OrdemDeCompra);
+        await _ordemDeCompraServico.FinalizarCompra(model.OrdemDeCompra);
 
-            if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
+        if (!OperacaoValida()) return PartialView("_OrdemDeCompraStatus", model);
 
-            return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
-
-        }
+        return RedirectToAction("CarrinhoDeCompras", "OrdemDeCompras", new { id = ordemDeCompra.Id });
 
     }
 
 }
+

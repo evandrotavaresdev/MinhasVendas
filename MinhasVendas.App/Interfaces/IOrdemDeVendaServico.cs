@@ -11,6 +11,7 @@ namespace MinhasVendas.App.Interfaces
         Task FinalizarVendaView(int id);
         Task<OrdemDeVenda> ConsultaOrdemDeVendaDetalhesDeVendaClienteProduto(int id);
         Task<OrdemDeVenda> ConsultaOrdemDeVendaDetalheDeVenda(int id);
+        Task<IEnumerable<OrdemDeVenda>> ConsultaOrdemDevendaCliente();
         Task<OrdemDeVenda> ConsultaOrdemDeVenda(int id);
     }
 }

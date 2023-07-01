@@ -1,7 +1,22 @@
-﻿@model MinhasVendas.App.ViewModels.CarrinhoDeComprasViewModel
+﻿@using MinhasVendas.App.Interfaces
+@model MinhasVendas.App.ViewModels.CarrinhoDeComprasViewModel
+@inject IProdutoServico produtoServico
 
 @{
     ViewData["Title"] = "Inserir Produto";
+}
+
+@{
+    var listaProdutos = (from c in await produtoServico.ConsultaProdutos()
+                         select new
+                         {
+                             Id = c.Id,
+                             NomeProtudo = c.Nome,
+                             Preco = c.PrecoBase,
+                             ProdutoCompleto = c.Nome + " | " + "Custo: R$ " + " " + c.PrecoBase
+                         });
+
+    var meusProdutos = new SelectList(listaProdutos, "Id", "ProdutoCompleto");
 }
 
     <div class="modal-header">
@@ -12,15 +27,19 @@
 <form asp-action="InserirProduto" id="inserirProdutoForm">
     
     <div class="modal-body">    
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+       @* <div asp-validation-summary="ModelOnly" class="text-danger"></div>*@
+       <div>
+            <vc:resumo></vc:resumo>
+       </div> 
+     
         
         <div class="form-group">
             <label asp-for="@Model.DetalheDeCompra.OrdemDeCompraId" class="control-label"></label>
-            <input readonly asp-for="@Model.DetalheDeCompra.OrdemDeCompraId" class="form-control" value=@ViewBag.OrdemDeCompraId>
+            <input readonly asp-for="@Model.DetalheDeCompra.OrdemDeCompraId" class="form-control" value=@ViewBag.OrdemDeCompraId> 
         </div>
         <div class="form-group">
             <label asp-for="@Model.DetalheDeCompra.ProdutoId" class="control-label"></label>
-            <select asp-for="@Model.DetalheDeCompra.ProdutoId" class="form-control" asp-items="ViewBag.ProdutoId"></select>
+            <select asp-for="@Model.DetalheDeCompra.ProdutoId" class="form-control" asp-items="meusProdutos"></select>
         </div>        
         <div class="form-group">
             <label asp-for="@Model.DetalheDeCompra.Quantidade" class="control-label"></label>

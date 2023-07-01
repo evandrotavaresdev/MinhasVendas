@@ -32,7 +32,14 @@ namespace MinhasVendas.App.Servicos
         {
             throw new NotImplementedException();
         }
-      
+
+        public async Task<IEnumerable<Produto>> ConsultaProdutos()
+        {
+            var produtos = await _minhasVendasAppContext.Produtos.AsNoTracking().ToListAsync();
+
+            return produtos;
+        }
+
         public Task Remover(int id)
         {
             throw new NotImplementedException();

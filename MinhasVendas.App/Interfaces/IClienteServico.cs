@@ -1,6 +1,10 @@
-﻿namespace MinhasVendas.App.Interfaces
+﻿using MinhasVendas.App.Models;
+using MinhasVendas.App.Servicos;
+
+namespace MinhasVendas.App.Interfaces
 {
-    public interface IClienteServico
+    public interface IClienteServico 
     {
+        Task<IEnumerable<Cliente>> ConsutaClientes();
     }
 }

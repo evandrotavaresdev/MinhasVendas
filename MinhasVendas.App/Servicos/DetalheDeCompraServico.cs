@@ -73,7 +73,7 @@ public class DetalheDeCompraServico : BaseServico, IDetalheDeCompraServico
 
         if (detalheDeCompra.RegistradoTransacaoDeEstoque)
         {
-            Notificar("Produto já registrado no estoque. Não é possível excluir.");
+            Notificar("Produto já registrado no estoque.");
             return;
         }
     }
@@ -114,6 +114,24 @@ public class DetalheDeCompraServico : BaseServico, IDetalheDeCompraServico
         transacaoDeEstoque.Quantidade = detalheDeCompra.Quantidade;
         _minhasVendasAppContext.Add(transacaoDeEstoque);
         await _minhasVendasAppContext.SaveChangesAsync();
+    }
+
+    public async Task<DetalheDeCompra> ConsultaDetalheDeCompraProdutoOrdemDeCompra(int id)
+    {
+        var consultaDetalheDeCompraProdutoOrdemDeCompra = await _minhasVendasAppContext.DetalheDeCompras
+                                                                 .AsNoTracking()
+                                                                 .Include(p => p.Produto)
+                                                                 .Include(o => o.OrdemDeCompra)
+                                                                 .FirstOrDefaultAsync(d=> d.Id == id);
+
+        return consultaDetalheDeCompraProdutoOrdemDeCompra;
+    }
+
+    public async Task<DetalheDeCompra> Consulta(int id)
+    {
+        var detalheDeCompra = await _minhasVendasAppContext.DetalheDeCompras.AsNoTracking().FirstOrDefaultAsync(d=> d.Id == id);
+
+        return detalheDeCompra;
     }
 }    
 

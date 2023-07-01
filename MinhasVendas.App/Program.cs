@@ -21,6 +21,7 @@ builder.Services.AddScoped<IOrdemDeVendaServico, OrdemDeVendaServico>();
 builder.Services.AddScoped<IDetalheDeVendaServico, DetalheDeVendaServico>();
 builder.Services.AddScoped<ITransacaoDeEstoqueServico, TransacaoDeEstoqueServico>();
 builder.Services.AddScoped<IFornecedorServico, FornecedorServico>();
+builder.Services.AddScoped<IClienteServico, ClienteServico>();
 
 var app = builder.Build();
 

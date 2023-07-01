@@ -91,9 +91,14 @@ public class OrdemDeVendaServico : BaseServico, IOrdemDeVendaServico
         return ordemDeVenda;
     }
 
-    public Task Adicionar(OrdemDeVenda ordemDeVenda)
+    public async Task Adicionar(OrdemDeVenda ordemDeVenda)
     {
-        throw new NotImplementedException();
+        _minhasVendasAppContext.OrdemDeVendas.Add(ordemDeVenda);
+        
+        ordemDeVenda.StatusOrdemDeVenda = StatusOrdemDeVenda.Orcamento;
+        ordemDeVenda.DataDeVenda = DateTime.Now;
+        
+        await _minhasVendasAppContext.SaveChangesAsync();
     }
 
     public Task Atualizar(OrdemDeVenda ordemDeVenda)
@@ -121,5 +126,12 @@ public class OrdemDeVendaServico : BaseServico, IOrdemDeVendaServico
         var ordemDeVenda = await _minhasVendasAppContext.OrdemDeVendas.FindAsync(id);
 
         return ordemDeVenda;
+    }
+
+    public async Task<IEnumerable<OrdemDeVenda>> ConsultaOrdemDevendaCliente()
+    {
+        var ordemDeVendaCliente = await _minhasVendasAppContext.OrdemDeVendas.AsNoTracking().Include(c => c.Cliente).ToListAsync();
+
+        return ordemDeVendaCliente;
     }
 }

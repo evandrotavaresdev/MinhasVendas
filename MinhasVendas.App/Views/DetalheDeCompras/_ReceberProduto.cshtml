@@ -9,7 +9,9 @@
     <h5 class="modal-title">@ViewData["Title"]</h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
-
+<div>
+    <vc:resumo></vc:resumo>
+</div>
 <form asp-action="ReceberProduto">
     <input type="hidden" asp-for="@Model.DetalheDeCompra.Id" />
     <div class="modal-body">        
