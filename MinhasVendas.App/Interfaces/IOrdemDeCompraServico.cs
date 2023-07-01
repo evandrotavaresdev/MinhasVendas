@@ -9,5 +9,11 @@ namespace MinhasVendas.App.Interfaces
         Task Remover(int id);
         Task FinalizarCompra(OrdemDeCompra ordemDeCompra);
         Task FinalizarCompraView(int id);
+
+        Task<OrdemDeCompra> ConsultaOrdemDeCompraDetalheDeCompraProdutoFornecedor(int id);
+        Task<IEnumerable<OrdemDeCompra>> ConsultaOrdemDeCompraFornecedor();
+        Task<OrdemDeCompra> ConsultaOrdemDeCompraDetalheDeCompra(int id);
+        Task<OrdemDeCompra> ConsultaOrdemDeCompra(int id);
+
     }
 }

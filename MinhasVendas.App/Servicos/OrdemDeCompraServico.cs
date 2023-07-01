@@ -9,22 +9,22 @@ namespace MinhasVendas.App.Servicos;
 public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
 {
     private readonly MinhasVendasAppContext _minhasVendasAppContext;
-  
+
 
     public OrdemDeCompraServico(MinhasVendasAppContext minhasVendasAppContext,
-                                INotificador notificador): base(notificador)
+                                INotificador notificador) : base(notificador)
     {
-        _minhasVendasAppContext = minhasVendasAppContext;   
+        _minhasVendasAppContext = minhasVendasAppContext;
     }
 
     public async Task Adicionar(OrdemDeCompra ordemDeCompra)
     {
         ordemDeCompra.DataDeCriacao = DateTime.Now;
         ordemDeCompra.StatusOrdemDeCompra = StatusOrdemDeCompra.Solicitado;
-       
-       
+
+
         _minhasVendasAppContext.Add(ordemDeCompra);
-        await _minhasVendasAppContext.SaveChangesAsync();           
+        await _minhasVendasAppContext.SaveChangesAsync();
 
     }
 
@@ -38,7 +38,7 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
         throw new NotImplementedException();
     }
 
-    
+
     public async Task FinalizarCompra(OrdemDeCompra ordemDeCompra)
     {
 
@@ -108,5 +108,36 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
             return;
         }
 
+    }
+
+    public async Task<OrdemDeCompra> ConsultaOrdemDeCompraDetalheDeCompraProdutoFornecedor(int id)
+    {
+        var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras
+                            .Include(d => d.DetalheDeCompras)
+                                .ThenInclude(p => p.Produto)
+                            .Include(f => f.Fornecedor)
+                            .FirstOrDefaultAsync(o => o.Id == id);
+        return ordemDeCompra;
+    }
+
+    public async Task<OrdemDeCompra> ConsultaOrdemDeCompraDetalheDeCompra(int id)
+    {
+        var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras.Include(d => d.DetalheDeCompras).FirstOrDefaultAsync(d => d.Id == id);
+
+        return ordemDeCompra;
+    }
+
+    public async Task<OrdemDeCompra> ConsultaOrdemDeCompra(int id)
+    {
+        var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras.FirstOrDefaultAsync(d => d.Id == id);
+
+        return ordemDeCompra;
+    }
+
+    public async Task<IEnumerable<OrdemDeCompra>> ConsultaOrdemDeCompraFornecedor()
+    {
+        var ordeDecompraFornecedor = await _minhasVendasAppContext.OrdemDeCompras.AsNoTracking().Include(f => f.Fornecedor).ToListAsync();
+
+        return ordeDecompraFornecedor;
     }
 }
