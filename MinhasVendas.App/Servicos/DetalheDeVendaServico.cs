@@ -48,6 +48,28 @@ public class DetalheDeVendaServico : BaseServico, IDetalheDeVendaServico
         throw new NotImplementedException();
     }
 
+    public async Task<DetalheDeVenda> ConsultaDetalheDeVendaOrdemDeVenda(int id)
+    {
+        var consultaDetalheDeVendaOrdemDeVenda = await _minhasVendasAppContext.DetalheDeVendas
+                                                       .AsNoTracking()
+                                                       .Include(o => o.OrdemDeVenda)
+                                                       .FirstOrDefaultAsync(d => d.Id == id);
+        return consultaDetalheDeVendaOrdemDeVenda;
+    }
+
+    public async Task<DetalheDeVenda> ConsultaDetalheDeVendaProdutoOrdemDeVenda(int id)
+    {
+        var consultaDetalheDeVendaProdutoOrdemDeVenda = await _minhasVendasAppContext
+                                                              .DetalheDeVendas
+                                                              .AsNoTracking()
+                                                              .Include(p => p.Produto)
+                                                              .Include(o => o.OrdemDeVenda)
+                                                              .FirstOrDefaultAsync(d => d.Id == id);
+
+        return consultaDetalheDeVendaProdutoOrdemDeVenda;
+                                                              
+    }
+
     public async Task Remover(int id, bool? ehView)
     {
         var detalheDeVenda = await _minhasVendasAppContext.DetalheDeVendas.Include(o => o.OrdemDeVenda).FirstOrDefaultAsync(o => o.Id == id);

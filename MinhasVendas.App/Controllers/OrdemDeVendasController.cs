@@ -95,7 +95,7 @@ public class OrdemDeVendasController : BaseController
 
         CarrinhoDeVendasViewModel model = new CarrinhoDeVendasViewModel();
 
-        if (!OperacaoValida()) return PartialView("_OrdemDeVendaAberta", model);
+        if (!OperacaoValida()) return PartialView("_OrdemDeVendaStatus", model);
 
         var ordemDeVenda = await _ordemDeVendaServico.ConsultaOrdemDeVendaDetalheDeVenda(id);
 
@@ -115,9 +115,9 @@ public class OrdemDeVendasController : BaseController
 
         await _ordemDeVendaServico.FinalizarVenda(model.OrdemDeVenda);
 
-        if (!OperacaoValida()) return PartialView("_OrdemDeCompraAberta", model);
+        if (!OperacaoValida()) return PartialView("_OrdemDeVendaStatus", model);
 
         return RedirectToAction("CarrinhoDeVendas", "OrdemDeVendas", new { id = ordemDeVenda.Id });
 
-    }
+    }       
 }
