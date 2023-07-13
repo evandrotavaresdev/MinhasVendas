@@ -1,8 +1,8 @@
 ﻿namespace MinhasVendas.App.Models
 {
-    public class Produto
+    public class Produto : Entidade
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         public string? Nome { get; set; }
         public decimal PrecoDeLista { get; set; }

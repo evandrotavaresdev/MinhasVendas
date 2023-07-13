@@ -1,8 +1,8 @@
 ﻿namespace MinhasVendas.App.Models
 {
-    public class Fornecedor
+    public class Fornecedor : Entidade
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         public string? Nome { get; set; }
 

@@ -2,9 +2,9 @@
 
 namespace MinhasVendas.App.Models
 {
-    public class OrdemDeCompra
+    public class OrdemDeCompra : Entidade
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         public int FornecedorId { get; set; }
         public DateTime DataDeCriacao { get; set; }

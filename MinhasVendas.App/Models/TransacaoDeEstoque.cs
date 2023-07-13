@@ -4,9 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MinhasVendas.App.Models
 {
-    public class TransacaoDeEstoque
+    public class TransacaoDeEstoque : Entidade
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         
         public int ProdutoId { get; set; }

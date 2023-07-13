@@ -5,17 +5,19 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MinhasVendas.App.Migrations
 {
-    public partial class _01Inicial : Migration
+    /// <inheritdoc />
+    public partial class Sqlite : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
                 name: "Clientes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -26,9 +28,9 @@ namespace MinhasVendas.App.Migrations
                 name: "Fornecedores",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -39,11 +41,12 @@ namespace MinhasVendas.App.Migrations
                 name: "Produtos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PrecoDeLista = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PrecoBase = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Nome = table.Column<string>(type: "TEXT", nullable: true),
+                    PrecoDeLista = table.Column<decimal>(type: "TEXT", nullable: false),
+                    PrecoBase = table.Column<decimal>(type: "TEXT", nullable: false),
+                    EstoqueAtual = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,13 +57,13 @@ namespace MinhasVendas.App.Migrations
                 name: "OrdemDeVendas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ClienteId = table.Column<int>(type: "int", nullable: false),
-                    StatusOrdemDeVenda = table.Column<int>(type: "int", nullable: false),
-                    FormaDePagamento = table.Column<int>(type: "int", nullable: false),
-                    DataDePagamento = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DataDeVenda = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ClienteId = table.Column<int>(type: "INTEGER", nullable: false),
+                    StatusOrdemDeVenda = table.Column<int>(type: "INTEGER", nullable: false),
+                    FormaDePagamento = table.Column<int>(type: "INTEGER", nullable: false),
+                    DataDePagamento = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    DataDeVenda = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -77,9 +80,13 @@ namespace MinhasVendas.App.Migrations
                 name: "OrdemDeCompras",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FornecedorId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FornecedorId = table.Column<int>(type: "INTEGER", nullable: false),
+                    DataDeCriacao = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    StatusOrdemDeCompra = table.Column<int>(type: "INTEGER", nullable: false),
+                    FormaDePagamento = table.Column<int>(type: "INTEGER", nullable: false),
+                    ValorDeFrete = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -96,13 +103,15 @@ namespace MinhasVendas.App.Migrations
                 name: "DetalheDeVendas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OrdemDeVendaId = table.Column<int>(type: "int", nullable: false),
-                    ProdutoId = table.Column<int>(type: "int", nullable: false),
-                    Quantidade = table.Column<int>(type: "int", nullable: false),
-                    PrecoUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Desconto = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OrdemDeVendaId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProdutoId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Quantidade = table.Column<int>(type: "INTEGER", nullable: false),
+                    PrecoUnitario = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Desconto = table.Column<decimal>(type: "TEXT", nullable: false),
+                    RegistroTransacaoDeEstoque = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TransacaoDeEstoqueId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -125,13 +134,15 @@ namespace MinhasVendas.App.Migrations
                 name: "DetalheDeCompras",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProdutoId = table.Column<int>(type: "int", nullable: false),
-                    OrdemDeCompraId = table.Column<int>(type: "int", nullable: false),
-                    TransacaoDeEstoqueId = table.Column<int>(type: "int", nullable: false),
-                    Quantidade = table.Column<int>(type: "int", nullable: false),
-                    CustoUnitario = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProdutoId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrdemDeCompraId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TransacaoDeEstoqueId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Quantidade = table.Column<int>(type: "INTEGER", nullable: false),
+                    CustoUnitario = table.Column<decimal>(type: "TEXT", nullable: false),
+                    DataDeRecebimento = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    RegistradoTransacaoDeEstoque = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -154,13 +165,14 @@ namespace MinhasVendas.App.Migrations
                 name: "TransacaoDeEstoques",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProdutoId = table.Column<int>(type: "int", nullable: false),
-                    OrdemDeCompraId = table.Column<int>(type: "int", nullable: true),
-                    OrdemDeVendaId = table.Column<int>(type: "int", nullable: true),
-                    Quantidade = table.Column<int>(type: "int", nullable: false),
-                    TipoDransacaoDeEstoque = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProdutoId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrdemDeCompraId = table.Column<int>(type: "INTEGER", nullable: true),
+                    OrdemDeVendaId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Quantidade = table.Column<int>(type: "INTEGER", nullable: false),
+                    TipoDransacaoDeEstoque = table.Column<int>(type: "INTEGER", nullable: false),
+                    DataDeTransacao = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -229,6 +241,7 @@ namespace MinhasVendas.App.Migrations
                 column: "ProdutoId");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

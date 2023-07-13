@@ -2,9 +2,9 @@
 
 namespace MinhasVendas.App.Models
 {
-    public class OrdemDeVenda
+    public class OrdemDeVenda : Entidade
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         public int ClienteId { get; set; }
        

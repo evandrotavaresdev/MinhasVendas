@@ -2,13 +2,13 @@
 
 namespace MinhasVendas.App.Models
 {
-    public class DetalheDeVenda
+    public class DetalheDeVenda : Entidade
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         public int OrdemDeVendaId { get; set; }
         public int ProdutoId { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "Valor Inválido")]
+        //[Range(1, 1000, ErrorMessage = "Valor Inválido")]
         public int Quantidade { get; set; }
         public decimal PrecoUnitario { get; set; }
         [Range(0, 20, ErrorMessage = "Valor Inválido")]

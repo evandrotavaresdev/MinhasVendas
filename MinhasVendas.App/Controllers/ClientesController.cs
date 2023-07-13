@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
+using MinhasVendas.App.Interfaces.Repositorio;
 using MinhasVendas.App.Models;
 
 namespace MinhasVendas.App.Controllers
@@ -13,18 +14,26 @@ namespace MinhasVendas.App.Controllers
     public class ClientesController : Controller
     {
         private readonly MinhasVendasAppContext _context;
+        private readonly IClienteRespositorio _clienteRespositorio;
 
-        public ClientesController(MinhasVendasAppContext context)
+        public ClientesController(MinhasVendasAppContext context,
+                                  IClienteRespositorio clienteRespositorio)
         {
             _context = context;
+            _clienteRespositorio = clienteRespositorio;
         }
 
         // GET: Clientes
         public async Task<IActionResult> Index()
         {
-              return _context.Clientes != null ? 
-                          View(await _context.Clientes.ToListAsync()) :
-                          Problem("Entity set 'AppEstoquesEVendasContext.Clientes'  is null.");
+
+            var clientes = await _clienteRespositorio.Obter().ToListAsync();
+
+            return View(clientes);
+
+              //return _context.Clientes != null ? 
+              //            View(await _context.Clientes.ToListAsync()) :
+              //            Problem("Entity set 'AppEstoquesEVendasContext.Clientes'  is null.");
         }
 
         // GET: Clientes/Details/5
