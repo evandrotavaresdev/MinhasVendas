@@ -14,10 +14,10 @@ namespace MinhasVendas.App.Controllers
             
 
             var nome = _configuration["Info:Nome"];
-            var conexao = _configuration.GetConnectionString("DefaultConnection");
+            var conexao = _configuration.GetConnectionString("MinhaConexao");
 
 
-            return $"Info: {nome} / {conexao}";
+            return $"Info: Nmome: {nome} ### Conexão: {conexao}";
         }
     }
 }
