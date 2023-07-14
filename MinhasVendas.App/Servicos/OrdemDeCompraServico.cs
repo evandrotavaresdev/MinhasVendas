@@ -40,7 +40,7 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
 
     public async Task FinalizarCompra(OrdemDeCompra ordemDeCompra)
     {
-        var itemOrdemDeCompra = await _ordemDeCompraRepositorio.ObterSemRastreamento().Include(d=> d.DetalheDeCompras).FirstOrDefaultAsync(o=> o.Id == ordemDeCompra.Id);
+        var itemOrdemDeCompra = await _ordemDeCompraRepositorio.Obter().Include(d=> d.DetalheDeCompras).FirstOrDefaultAsync(o=> o.Id == ordemDeCompra.Id);
 
         var temItensDeCompra = itemOrdemDeCompra.DetalheDeCompras.Any();
 
