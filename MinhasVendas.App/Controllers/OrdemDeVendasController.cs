@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Interfaces;
+using MinhasVendas.App.Interfaces.Repositorio;
+using MinhasVendas.App.Interfaces.Servico;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Models.Enums;
 using MinhasVendas.App.ViewModels;
@@ -16,15 +18,15 @@ namespace MinhasVendas.App.Controllers;
 public class OrdemDeVendasController : BaseController
 {       
     private readonly IOrdemDeVendaServico _ordemDeVendaServico;
-    private readonly IClienteServico _clienteServico;
+    private readonly IClienteRespositorio _clienteRespositorio;
 
     public OrdemDeVendasController(MinhasVendasAppContext context,
                                    IOrdemDeVendaServico ordemDeVendaServico,
-                                   IClienteServico clienteServico,
+                                   IClienteRespositorio clienteRespositorio,
                                    INotificador notificador) : base(notificador)
     {
         _ordemDeVendaServico = ordemDeVendaServico;
-        _clienteServico = clienteServico;
+        _clienteRespositorio = clienteRespositorio;
     }
 
     public async Task<IActionResult> Index()
@@ -36,7 +38,7 @@ public class OrdemDeVendasController : BaseController
 
     public async Task<IActionResult> Create()
     {
-        ViewData["ClienteId"] = new SelectList(await _clienteServico.ConsutaClientes(), "Id", "Nome");
+        ViewData["ClienteId"] = new SelectList(await _clienteRespositorio.BuscarTodos(), "Id", "Nome");
         return View();
     }
 
@@ -46,7 +48,7 @@ public class OrdemDeVendasController : BaseController
     {
         if (!ModelState.IsValid)
         {
-            ViewData["ClienteId"] = new SelectList(await _clienteServico.ConsutaClientes(), "Id", "Nome", ordemDeVenda.ClienteId);
+            ViewData["ClienteId"] = new SelectList(await _clienteRespositorio.BuscarTodos(), "Id", "Nome", ordemDeVenda.ClienteId);
             return View(ordemDeVenda);
         }
 
@@ -54,7 +56,7 @@ public class OrdemDeVendasController : BaseController
 
         if (!OperacaoValida())
         {
-            ViewData["ClienteId"] = new SelectList(await _clienteServico.ConsutaClientes(), "Id", "Nome", ordemDeVenda.ClienteId);
+            ViewData["ClienteId"] = new SelectList(await _clienteRespositorio.BuscarTodos(), "Id", "Nome", ordemDeVenda.ClienteId);
             return View(ordemDeVenda);
         }
 

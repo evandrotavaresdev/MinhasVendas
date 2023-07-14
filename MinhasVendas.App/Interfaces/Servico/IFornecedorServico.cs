@@ -4,7 +4,9 @@ namespace MinhasVendas.App.Interfaces
 {
     public interface IFornecedorServico
     {
-        Task<IEnumerable<Fornecedor>> ConsultaFornecedor();
-        
+        Task Adicionar(Fornecedor fornecedor);
+        Task Atualizar(Fornecedor fornecedor);
+        Task Remover(int id);
+
     }
 }

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Interfaces;
+using MinhasVendas.App.Interfaces.Repositorio;
+using MinhasVendas.App.Interfaces.Servico;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Servicos;
 using MinhasVendas.App.ViewModels;
@@ -16,14 +18,14 @@ namespace MinhasVendas.App.Controllers;
 public class OrdemDeComprasController : BaseController
 {       
     private readonly IOrdemDeCompraServico _ordemDeCompraServico;
-    private readonly IFornecedorServico _fornecedorServico;
+    private readonly IFornecedorRepositorio _fornecedorRepositorio;
 
     public OrdemDeComprasController(IOrdemDeCompraServico ordemDeCompraServico,
-                                    IFornecedorServico fornecedorServico,
+                                    IFornecedorRepositorio fornecedorRepositorio,
                                     INotificador notificador) : base(notificador)
     {
         _ordemDeCompraServico = ordemDeCompraServico;
-        _fornecedorServico = fornecedorServico;
+        _fornecedorRepositorio = fornecedorRepositorio;
     }
 
     public async Task<IActionResult> Index()
@@ -34,7 +36,7 @@ public class OrdemDeComprasController : BaseController
 
     public async Task<IActionResult> Create()
     {
-        ViewData["FornecedorId"] = new SelectList(await _fornecedorServico.ConsultaFornecedor(), "Id", "Nome");
+        ViewData["FornecedorId"] = new SelectList(await  _fornecedorRepositorio.BuscarTodos(), "Id", "Nome");
 
         return View();
     }
@@ -43,7 +45,7 @@ public class OrdemDeComprasController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,FornecedorId,DataDeCriacao,StatusOrdemDeCompra,ValorDeFrete")] OrdemDeCompra ordemDeCompra)
     {
-        ViewData["FornecedorId"] = new SelectList(await _fornecedorServico.ConsultaFornecedor(), "Id", "Id", ordemDeCompra.FornecedorId);
+        ViewData["FornecedorId"] = new SelectList(await _fornecedorRepositorio.BuscarTodos(), "Id", "Nome", ordemDeCompra.FornecedorId);
 
         if (!ModelState.IsValid) return View(ordemDeCompra);
 

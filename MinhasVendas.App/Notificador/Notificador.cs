@@ -1,4 +1,4 @@
-﻿using MinhasVendas.App.Interfaces;
+﻿using MinhasVendas.App.Interfaces.Servico;
 
 namespace MinhasVendas.App.Notificador
 {

@@ -2,6 +2,7 @@
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Interfaces.Repositorio;
+using MinhasVendas.App.Interfaces.Servico;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Models.Enums;
 
@@ -10,17 +11,11 @@ namespace MinhasVendas.App.Servicos;
 public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
 {
     private readonly IOrdemDeCompraRepositorio _ordemDeCompraRepositorio;
-    private readonly IDetalheDeCompraRepositorio _detalheDeCompraRepositorio;
-    private readonly IFornecedorRepositorio _fornecedorRepositorio;
 
     public OrdemDeCompraServico(
                                 INotificador notificador,
-                                IDetalheDeCompraRepositorio detalheDeCompraRepositorio,
-                                IFornecedorRepositorio fornecedorRepositorio,
                                 IOrdemDeCompraRepositorio ordemDeCompraRepositorio) : base(notificador)
     {
-        _detalheDeCompraRepositorio = detalheDeCompraRepositorio;
-        _fornecedorRepositorio = fornecedorRepositorio;
         _ordemDeCompraRepositorio = ordemDeCompraRepositorio;
     }
 
@@ -46,11 +41,6 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
     public async Task FinalizarCompra(OrdemDeCompra ordemDeCompra)
     {
         var itemOrdemDeCompra = await _ordemDeCompraRepositorio.ObterSemRastreamento().Include(d=> d.DetalheDeCompras).FirstOrDefaultAsync(o=> o.Id == ordemDeCompra.Id);
-
-        //var itemOrdemDeCompra =
-        //    await _minhasVendasAppContext.OrdemDeCompras
-        //   .Include(v => v.DetalheDeCompras)
-        //   .FirstOrDefaultAsync(v => v.Id == ordemDeCompra.Id);
 
         var temItensDeCompra = itemOrdemDeCompra.DetalheDeCompras.Any();
 
@@ -79,19 +69,12 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
 
         await _ordemDeCompraRepositorio.Atualizar(itemOrdemDeCompra);
 
-        //_minhasVendasAppContext.Update(itemOrdemDeCompra);
-        //await _minhasVendasAppContext.SaveChangesAsync();
-
     }
 
     public async Task FinalizarCompraView(int id)
     {
           var ordemDeCompra = await _ordemDeCompraRepositorio.Obter().Include(d => d.DetalheDeCompras).FirstOrDefaultAsync(o => o.Id == id);
 
-        //var ordemDeCompra =
-        //    await _minhasVendasAppContext.OrdemDeCompras
-        //   .Include(v => v.DetalheDeCompras)
-        //   .FirstOrDefaultAsync(v => v.Id == id);
 
         var temItensDeCompra = ordemDeCompra.DetalheDeCompras.Any();
 
@@ -121,16 +104,9 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
     {
         var ordemDeCompra = await _ordemDeCompraRepositorio.Obter()
                                     .Include(d => d.DetalheDeCompras)
-                                        .ThenInclude(p=> p.Produto)
+                                    .ThenInclude(p=> p.Produto)
                                     .Include(f=> f.Fornecedor)
                                     .FirstOrDefaultAsync(o => o.Id == id);
-
-      
-          //var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras
-          //                  .Include(d => d.DetalheDeCompras)
-          //                      .ThenInclude(p => p.Produto)
-          //                  .Include(f => f.Fornecedor)
-          //                  .FirstOrDefaultAsync(o => o.Id == id);
 
         return ordemDeCompra;
     }
@@ -140,8 +116,6 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
 
         var ordemDeCompra = await _ordemDeCompraRepositorio.Obter().Include(d => d.DetalheDeCompras).FirstOrDefaultAsync(o => o.Id == id);
       
-        //  var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras.Include(d => d.DetalheDeCompras).FirstOrDefaultAsync(d => d.Id == id);
-
         return ordemDeCompra;
     }
 
@@ -149,8 +123,6 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
     {
         var ordemDeCompra = await _ordemDeCompraRepositorio.BuscarPorId(id);
        
-      //  var ordemDeCompra = await _minhasVendasAppContext.OrdemDeCompras.FirstOrDefaultAsync(d => d.Id == id);
-
         return ordemDeCompra;
     }
 
@@ -158,8 +130,6 @@ public class OrdemDeCompraServico : BaseServico, IOrdemDeCompraServico
     {
         var ordeDecompraFornecedor = await _ordemDeCompraRepositorio.ObterSemRastreamento().Include(f=> f.Fornecedor).ToListAsync();
      
-        //  var ordeDecompraFornecedor = await _minhasVendasAppContext.OrdemDeCompras.AsNoTracking().Include(f => f.Fornecedor).ToListAsync();
-
         return ordeDecompraFornecedor;
     }
 }

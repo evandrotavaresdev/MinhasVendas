@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Interfaces\Servicos\**" />
+    <Content Remove="Interfaces\Servicos\**" />
+    <EmbeddedResource Remove="Interfaces\Servicos\**" />
+    <None Remove="Interfaces\Servicos\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Views\OrdemDeVendas\CarrinhoDeVendas - Cópia.cshtml" />
   </ItemGroup>
 

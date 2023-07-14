@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using MinhasVendas.App.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MinhasVendas.App.Interfaces.Servico;
 
 namespace MinhasVendas.App.Extensoes
 {

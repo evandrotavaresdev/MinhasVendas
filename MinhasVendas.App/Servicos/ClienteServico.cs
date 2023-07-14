@@ -1,29 +1,33 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
-using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Interfaces.Repositorio;
+using MinhasVendas.App.Interfaces.Servico;
 using MinhasVendas.App.Models;
 
 namespace MinhasVendas.App.Servicos
 {
     public class ClienteServico : BaseServico, IClienteServico
     {
-        private readonly MinhasVendasAppContext _minhasVendasAppContext;
         private readonly IClienteRespositorio _clienteRespositorio;
-
-        public ClienteServico(MinhasVendasAppContext minhasVendasAppContext,
-                              INotificador notificador,
+        public ClienteServico(INotificador notificador, 
                               IClienteRespositorio clienteRespositorio) : base(notificador)
         {
-            _minhasVendasAppContext = minhasVendasAppContext; 
             _clienteRespositorio = clienteRespositorio;
         }
 
-        public async Task<IEnumerable<Cliente>> ConsutaClientes()
+        public async Task Adicionar(Cliente cliente)
         {
-            var clientes = await _minhasVendasAppContext.Clientes.ToListAsync();
-            
-            return clientes;
+            await _clienteRespositorio.Adicionar(cliente);
+        }
+
+        public async Task Atualizar(Cliente cliente)
+        {
+             await _clienteRespositorio.Atualizar(cliente);
+        }
+
+        public async Task Remover(int id)
+        {
+            await _clienteRespositorio.Remover(id);
         }
     }
 }

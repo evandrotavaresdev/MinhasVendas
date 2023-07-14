@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MinhasVendas.App.Data;
 using MinhasVendas.App.Interfaces;
 using MinhasVendas.App.Interfaces.Repositorio;
+using MinhasVendas.App.Interfaces.Servico;
 using MinhasVendas.App.Models;
 using MinhasVendas.App.Notificador;
 using MinhasVendas.App.Repositorio;

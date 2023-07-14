@@ -6,158 +6,111 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MinhasVendas.App.Data;
+using MinhasVendas.App.Interfaces;
+using MinhasVendas.App.Interfaces.Repositorio;
+using MinhasVendas.App.Interfaces.Servico;
 using MinhasVendas.App.Models;
 
 namespace MinhasVendas.App.Controllers
 {
-    public class FornecedoresController : Controller
+    
+    public class FornecedoresController : BaseController
     {
-        private readonly MinhasVendasAppContext _context;
+        private readonly IFornecedorRepositorio _fornecedorRepositorio;
+        private readonly IFornecedorServico _fornecedorServico;
 
-        public FornecedoresController(MinhasVendasAppContext context)
+        public FornecedoresController(IFornecedorRepositorio fornecedorRepositorio,
+                                      IFornecedorServico fornecedorServico,
+                                      INotificador notificador) : base(notificador)
         {
-            _context = context;
+            _fornecedorRepositorio = fornecedorRepositorio;
+            _fornecedorServico = fornecedorServico;
         }
 
-        // GET: Fornecedores
         public async Task<IActionResult> Index()
         {
-              return _context.Fornecedores != null ? 
-                          View(await _context.Fornecedores.ToListAsync()) :
-                          Problem("Entity set 'AppEstoquesEVendasContext.Fornecedores'  is null.");
+            var fornecedores = await _fornecedorRepositorio.BuscarTodos();
+            return View(fornecedores);
+
         }
 
-        // GET: Fornecedores/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null || _context.Fornecedores == null)
-            {
-                return NotFound();
-            }
+            var fornecedor = await _fornecedorRepositorio.BuscarPorId(id);
 
-            var fornecedor = await _context.Fornecedores
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (fornecedor == null)
-            {
-                return NotFound();
-            }
-
+            if (fornecedor == null) return NotFound();
+          
             return View(fornecedor);
         }
 
-        // GET: Fornecedores/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Fornecedores/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome")] Fornecedor fornecedor)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(fornecedor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(fornecedor);
+            if (!ModelState.IsValid) return View(fornecedor);
+
+            await _fornecedorServico.Adicionar(fornecedor);
+
+            if (!OperacaoValida()) return View(fornecedor);
+
+            return RedirectToAction(nameof(Index));
+      
         }
 
-        // GET: Fornecedores/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null || _context.Fornecedores == null)
-            {
-                return NotFound();
-            }
+            var fornecedor = await _fornecedorRepositorio.BuscarPorId(id);
 
-            var fornecedor = await _context.Fornecedores.FindAsync(id);
-            if (fornecedor == null)
-            {
-                return NotFound();
-            }
+            if (fornecedor == null) return NotFound();
+          
             return View(fornecedor);
         }
-
-        // POST: Fornecedores/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome")] Fornecedor fornecedor)
         {
-            if (id != fornecedor.Id)
-            {
-                return NotFound();
-            }
+            if (id != fornecedor.Id) return NotFound();
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(fornecedor);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!FornecedorExists(fornecedor.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(fornecedor);
+            if (!ModelState.IsValid) return View(fornecedor);
+
+            await _fornecedorServico.Atualizar(fornecedor);
+
+            if (!OperacaoValida()) return View(fornecedor);
+
+            return RedirectToAction(nameof(Index));
+
         }
-
-        // GET: Fornecedores/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+     
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null || _context.Fornecedores == null)
-            {
-                return NotFound();
-            }
-
-            var fornecedor = await _context.Fornecedores
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (fornecedor == null)
-            {
-                return NotFound();
-            }
-
+            var fornecedor = await _fornecedorRepositorio.ObterPorId(m => m.Id == id);
+            
+            if (fornecedor == null) return NotFound();
+         
             return View(fornecedor);
         }
-
-        // POST: Fornecedores/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Fornecedores == null)
-            {
-                return Problem("Entity set 'AppEstoquesEVendasContext.Fornecedores'  is null.");
-            }
-            var fornecedor = await _context.Fornecedores.FindAsync(id);
-            if (fornecedor != null)
-            {
-                _context.Fornecedores.Remove(fornecedor);
-            }
+            var fornecedor = await _fornecedorRepositorio.BuscarPorId(id);
             
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            if (fornecedor == null) return View(fornecedor);
 
-        private bool FornecedorExists(int id)
-        {
-          return (_context.Fornecedores?.Any(e => e.Id == id)).GetValueOrDefault();
+            _fornecedorRepositorio.Desanexar(fornecedor);
+
+            await _fornecedorServico.Remover(id);
+
+            if (!OperacaoValida()) return View(fornecedor);
+            
+            return RedirectToAction(nameof(Index));
         }
     }
 }

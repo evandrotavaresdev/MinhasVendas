@@ -52,13 +52,13 @@ namespace MinhasVendas.App.Repositorio
 
         public IQueryable<T> Obter()
         {
-            return _dbSet.AsNoTracking();
+            return _dbSet;
 
         }
 
         public IQueryable<T> ObterSemRastreamento()
         {
-            return _dbSet;
+            return _dbSet.AsNoTracking();
         }
 
         public async Task<T> ObterPorId(Expression<Func<T, bool>> predicate)

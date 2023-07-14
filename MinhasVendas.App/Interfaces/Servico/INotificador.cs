@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 using MinhasVendas.App.Notificador;
 
-namespace MinhasVendas.App.Interfaces
+namespace MinhasVendas.App.Interfaces.Servico
 {
     public interface INotificador
     {

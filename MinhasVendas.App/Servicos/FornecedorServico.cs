@@ -1,24 +1,32 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MinhasVendas.App.Data;
-using MinhasVendas.App.Interfaces;
+﻿using MinhasVendas.App.Interfaces;
+using MinhasVendas.App.Interfaces.Repositorio;
+using MinhasVendas.App.Interfaces.Servico;
 using MinhasVendas.App.Models;
 
 namespace MinhasVendas.App.Servicos
 {
     public class FornecedorServico : BaseServico, IFornecedorServico
     {
-        private readonly MinhasVendasAppContext _minhasVendasAppContext;
-        public FornecedorServico(MinhasVendasAppContext minhasVendasAppContext,
-                                 INotificador notificador) : base(notificador)
+        private readonly IFornecedorRepositorio _fornecedorRepositorio;
+        public FornecedorServico(INotificador notificador,
+                                 IFornecedorRepositorio fornecedorRepositorio) : base(notificador)
         {
-            _minhasVendasAppContext = minhasVendasAppContext;
+            _fornecedorRepositorio = fornecedorRepositorio;
         }
 
-        public async Task<IEnumerable<Fornecedor>> ConsultaFornecedor()
+        public async Task Adicionar(Fornecedor fornecedor)
         {
-            var fornecedor =  await _minhasVendasAppContext.Fornecedores.ToListAsync();
+            await _fornecedorRepositorio.Adicionar(fornecedor);
+        }
 
-            return fornecedor;
+        public async Task Atualizar(Fornecedor fornecedor)
+        {
+            await _fornecedorRepositorio.Atualizar(fornecedor);
+        }
+
+        public async Task Remover(int id)
+        {
+            await _fornecedorRepositorio.Remover(id);
         }
     }
 }
